@@ -682,11 +682,11 @@ fun EmberBottomNavigation(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val tabs = listOf(
-                "Videos" to Icons.Rounded.Movie,
-                "Music" to Icons.Rounded.Audiotrack,
-                "Download" to Icons.Rounded.ArrowDownward,
-                "More" to Icons.Rounded.MoreHoriz
+            val tabs: List<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>> = listOf(
+                "Videos" to androidx.compose.material.icons.Icons.Rounded.Movie,
+                "Music" to androidx.compose.material.icons.Icons.Rounded.Audiotrack,
+                "Download" to androidx.compose.material.icons.Icons.Rounded.ArrowDownward,
+                "More" to androidx.compose.material.icons.Icons.Rounded.MoreHoriz
             )
 
             tabs.forEach { (tabName, icon) ->
