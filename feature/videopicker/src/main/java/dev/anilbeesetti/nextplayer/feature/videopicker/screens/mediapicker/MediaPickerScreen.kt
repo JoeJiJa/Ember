@@ -52,6 +52,7 @@ import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Feedback
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material3.DropdownMenu
