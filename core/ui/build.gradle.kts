@@ -44,7 +44,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtimeCompose)
-    implementation(libs.androidx.compose.material.iconsExtended)
 
     implementation(libs.androidx.hilt.navigation.compose)
 

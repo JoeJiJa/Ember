@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,7 +66,7 @@ fun TextIconToggleButtonPreview() {
         Surface {
             TextIconToggleButton(
                 text = "Text",
-                icon = Icons.Rounded.Search,
+                icon = Icons.Filled.Search,
             )
         }
     }
