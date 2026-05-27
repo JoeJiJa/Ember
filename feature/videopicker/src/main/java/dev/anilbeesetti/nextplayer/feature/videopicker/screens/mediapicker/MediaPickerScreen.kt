@@ -47,14 +47,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Movie
-import androidx.compose.material.icons.rounded.MusicNote
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.MoreHoriz
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.Feedback
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material.icons.automirrored.rounded.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -542,7 +535,7 @@ fun DarkTopAppBar(
             if (isInSelectionMode) {
                 IconButton(onClick = onClearSelection) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = Icons.Default.Close,
                         contentDescription = "Close",
                         tint = Color.White
                     )
@@ -556,7 +549,7 @@ fun DarkTopAppBar(
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = onSelectAllToggle) {
                     Icon(
-                        imageVector = if (isAllSelected) Icons.Rounded.CheckBox else Icons.Rounded.SelectAll,
+                        imageVector = if (isAllSelected) Icons.Default.Check else Icons.Default.CheckCircle,
                         contentDescription = "Select All Toggle",
                         tint = Color.White
                     )
@@ -565,7 +558,7 @@ fun DarkTopAppBar(
                 if (showBackButton) {
                     IconButton(onClick = onNavigateUp) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
                             tint = Color.White
                         )
@@ -586,7 +579,7 @@ fun DarkTopAppBar(
 
                 IconButton(onClick = onMusicToggle) {
                     Icon(
-                        imageVector = Icons.Rounded.MusicNote,
+                        imageVector = Icons.Default.Home,
                         contentDescription = "Music Toggle",
                         tint = Color.White
                     )
@@ -594,7 +587,7 @@ fun DarkTopAppBar(
 
                 IconButton(onClick = onLayoutToggle) {
                     Icon(
-                        imageVector = Icons.Rounded.GridView,
+                        imageVector = Icons.Default.List,
                         contentDescription = "Layout Toggle",
                         tint = Color.White
                     )
@@ -602,7 +595,7 @@ fun DarkTopAppBar(
 
                 IconButton(onClick = onSearchClick) {
                     Icon(
-                        imageVector = Icons.Rounded.Search,
+                        imageVector = Icons.Default.Search,
                         contentDescription = "Search",
                         tint = Color.White
                     )
@@ -672,10 +665,10 @@ fun EmberBottomNavigation(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val tabs: List<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>> = listOf(
-                "Videos" to Icons.Rounded.Movie,
-                "Music" to Icons.Rounded.MusicNote,
-                "Download" to Icons.Rounded.KeyboardArrowDown,
-                "More" to Icons.Rounded.MoreHoriz
+                "Videos" to Icons.Default.PlayArrow,
+                "Music" to Icons.Default.Home,
+                "Download" to Icons.Default.ArrowDownward,
+                "More" to Icons.Default.Settings
             )
 
             tabs.forEach { (tabName, icon) ->
@@ -792,7 +785,7 @@ fun MusicLibraryView(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.MusicNote,
+                        imageVector = Icons.Default.Home,
                         contentDescription = null,
                         tint = themeColor,
                         modifier = Modifier.size(24.dp)
@@ -838,7 +831,7 @@ fun BrowserDownloaderView(
             onValueChange = { urlInput = it },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Search or type web URL...", color = Color.Gray) },
-            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = "Search", tint = Color.Gray) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
             trailingIcon = {
                 if (urlInput.isNotBlank()) {
                     TextButton(
@@ -963,12 +956,12 @@ fun MoreOptionsView(
     var vaultError by remember { mutableStateOf("") }
 
     val menuItems = listOf(
-        "Settings" to Icons.Rounded.Settings,
-        "Themes" to Icons.Rounded.Palette,
-        "Hidden Folder" to Icons.Rounded.Lock,
-        "Widgets" to Icons.Rounded.Widgets,
-        "Feedback" to Icons.Rounded.Feedback,
-        "About" to Icons.Rounded.Info
+        "Settings" to Icons.Default.Settings,
+        "Themes" to Icons.Default.Refresh,
+        "Hidden Folder" to Icons.Default.Lock,
+        "Widgets" to Icons.Default.Build,
+        "Feedback" to Icons.Default.Email,
+        "About" to Icons.Default.Info
     )
 
     Column(
@@ -1007,7 +1000,7 @@ fun MoreOptionsView(
                 Icon(imageVector = icon, contentDescription = name, tint = themeColor, modifier = Modifier.size(24.dp))
                 Text(name, color = Color.White, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
+                Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
             }
         }
     }
@@ -1144,7 +1137,7 @@ fun MoreOptionsView(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         (1..5).forEach { star ->
                             Icon(
-                                imageVector = Icons.Rounded.Star,
+                                imageVector = Icons.Default.Star,
                                 contentDescription = null,
                                 tint = if (star <= rating) Color(0xFFFFD700) else Color.Gray,
                                 modifier = Modifier
@@ -1196,7 +1189,7 @@ fun MoreOptionsView(
                             .background(themeColor),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Rounded.Movie, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
+                        Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text("Ember Player", color = Color.White, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
