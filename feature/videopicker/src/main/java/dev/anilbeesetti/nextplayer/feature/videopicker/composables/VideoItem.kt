@@ -1,50 +1,59 @@
 package dev.anilbeesetti.nextplayer.feature.videopicker.composables
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.anilbeesetti.nextplayer.core.model.ApplicationPreferences
 import dev.anilbeesetti.nextplayer.core.model.MediaLayoutMode
 import dev.anilbeesetti.nextplayer.core.model.Video
-import dev.anilbeesetti.nextplayer.core.ui.components.NextSegmentedListItem
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
-import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
 
 @Composable
 fun VideoItem(
@@ -57,277 +66,271 @@ fun VideoItem(
     selected: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
+    onRenameClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    themeColor: Color = Color(0xFFFF5722)
 ) {
-    when (preferences.mediaLayoutMode) {
-        MediaLayoutMode.LIST -> VideoListItem(
-            video = video,
-            isRecentlyPlayedVideo = isRecentlyPlayedVideo,
-            preferences = preferences,
-            modifier = modifier,
-            isFirstItem = isFirstItem,
-            isLastItem = isLastItem,
-            selected = selected,
-            onClick = onClick,
-            onLongClick = onLongClick,
-        )
-        MediaLayoutMode.GRID -> VideoGridItem(
-            video = video,
-            isRecentlyPlayedVideo = isRecentlyPlayedVideo,
-            preferences = preferences,
-            modifier = modifier,
-            isFirstItem = isFirstItem,
-            isLastItem = isLastItem,
-            selected = selected,
-            onClick = onClick,
-            onLongClick = onLongClick,
-        )
+    VideoListItem(
+        video = video,
+        isRecentlyPlayedVideo = isRecentlyPlayedVideo,
+        preferences = preferences,
+        modifier = modifier,
+        selected = selected,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onRenameClick = onRenameClick,
+        onShareClick = onShareClick,
+        onInfoClick = onInfoClick,
+        onDeleteClick = onDeleteClick,
+        themeColor = themeColor
+    )
+}
+
+@Composable
+fun AnimatedEqualizer(
+    modifier: Modifier = Modifier,
+    color: Color = Color(0xFFFF5722)
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "equalizer")
+    
+    val heightScale1 by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bar1"
+    )
+    val heightScale2 by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bar2"
+    )
+    val heightScale3 by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bar3"
+    )
+    
+    Row(
+        modifier = modifier
+            .height(14.dp)
+            .width(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Box(modifier = Modifier.weight(1f).fillMaxHeight(heightScale1).background(color, CircleShape))
+        Box(modifier = Modifier.weight(1f).fillMaxHeight(heightScale2).background(color, CircleShape))
+        Box(modifier = Modifier.weight(1f).fillMaxHeight(heightScale3).background(color, CircleShape))
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun VideoListItem(
     video: Video,
     isRecentlyPlayedVideo: Boolean,
     preferences: ApplicationPreferences,
     modifier: Modifier = Modifier,
-    isFirstItem: Boolean = false,
-    isLastItem: Boolean = false,
     selected: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
-) {
-    NextSegmentedListItem(
-        modifier = modifier,
-        selected = selected,
-        contentPadding = PaddingValues(8.dp),
-        colors = ListItemDefaults.segmentedColors(
-            contentColor = if (isRecentlyPlayedVideo && preferences.markLastPlayedMedia) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                ListItemDefaults.segmentedColors().contentColor
-            },
-            supportingContentColor = if (isRecentlyPlayedVideo && preferences.markLastPlayedMedia) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                ListItemDefaults.colors().supportingContentColor
-            },
-            selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f),
-        ),
-        isFirstItem = isFirstItem,
-        isLastItem = isLastItem,
-        onClick = onClick,
-        onLongClick = onLongClick,
-        leadingContent = {
-            ThumbnailView(
-                video = video,
-                preferences = preferences,
-                modifier = Modifier
-                    .width(min(150.dp, LocalConfiguration.current.screenWidthDp.dp * 0.35f)),
-            )
-        },
-        content = {
-            Text(
-                text = if (preferences.showExtensionField) video.nameWithExtension else video.displayName,
-                maxLines = 2,
-                style = MaterialTheme.typography.titleMedium,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        supportingContent = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                if (preferences.showPathField) {
-                    Text(
-                        text = video.path.substringBeforeLast("/"),
-                        maxLines = 2,
-                        style = MaterialTheme.typography.bodySmall,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                ) {
-                    if (preferences.showSizeField) {
-                        InfoChip(text = video.formattedFileSize)
-                    }
-                    if (preferences.showResolutionField && video.height > 0) {
-                        InfoChip(text = "${video.height}p")
-                    }
-                }
-            }
-        },
-    )
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun VideoGridItem(
-    video: Video,
-    isRecentlyPlayedVideo: Boolean,
-    preferences: ApplicationPreferences,
-    modifier: Modifier = Modifier,
-    isFirstItem: Boolean = false,
-    isLastItem: Boolean = false,
-    selected: Boolean = false,
-    onClick: () -> Unit = {},
-    onLongClick: (() -> Unit)? = null,
-) {
-    NextSegmentedListItem(
-        modifier = modifier.width(IntrinsicSize.Min),
-        selected = selected,
-        contentPadding = PaddingValues(8.dp),
-        colors = ListItemDefaults.segmentedColors(
-            contentColor = if (isRecentlyPlayedVideo && preferences.markLastPlayedMedia) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                ListItemDefaults.segmentedColors().contentColor
-            },
-            supportingContentColor = if (isRecentlyPlayedVideo && preferences.markLastPlayedMedia) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                ListItemDefaults.colors().supportingContentColor
-            },
-            selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f),
-        ),
-        isFirstItem = isFirstItem,
-        isLastItem = isLastItem,
-        onClick = onClick,
-        onLongClick = onLongClick,
-        content = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                ThumbnailView(
-                    video = video,
-                    preferences = preferences,
-                )
-                Text(
-                    text = if (preferences.showExtensionField) video.nameWithExtension else video.displayName,
-                    maxLines = 2,
-                    style = MaterialTheme.typography.titleMedium,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    color = if (isRecentlyPlayedVideo && preferences.markLastPlayedMedia) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        ListItemDefaults.colors().contentColor
-                    },
-                )
-            }
-        },
-    )
-}
-
-@Composable
-private fun ThumbnailView(
-    modifier: Modifier = Modifier,
-    video: Video,
-    preferences: ApplicationPreferences,
+    onRenameClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    themeColor: Color = Color(0xFFFF5722)
 ) {
     val context = LocalContext.current
-    Box(
+    var showMenu by remember { mutableStateOf(false) }
+
+    val isNew = remember(video.dateModified) {
+        val time = if (video.dateModified < 20000000000L) video.dateModified * 1000 else video.dateModified
+        (System.currentTimeMillis() - time) < 7 * 24 * 60 * 60 * 1000L
+    }
+
+    Row(
         modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-            .aspectRatio(16f / 10f),
+            .fillMaxWidth()
+            .background(if (selected) themeColor.copy(alpha = 0.15f) else Color.Transparent)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(
-            imageVector = NextIcons.Video,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.surfaceColorAtElevation(100.dp),
+        // Left Side: 16:9 Thumbnail Box
+        Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxSize(0.5f),
-        )
-        if (preferences.showThumbnailField) {
+                .width(130.dp)
+                .aspectRatio(16f / 9f)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFF1E1E1E))
+                .border(
+                    width = if (selected) 2.dp else 0.dp,
+                    color = if (selected) themeColor else Color.Transparent,
+                    shape = RoundedCornerShape(8.dp)
+                )
+        ) {
+            Icon(
+                imageVector = NextIcons.Video,
+                contentDescription = null,
+                tint = Color(0xFF333333),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(32.dp)
+            )
+
+            // Video Thumbnail
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(video.uriString)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
-                alignment = Alignment.Center,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             )
-        }
-        if (preferences.showDurationField) {
-            InfoChip(
-                text = video.formattedDuration,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .align(Alignment.BottomEnd),
-                backgroundColor = Color.Black.copy(alpha = 0.6f),
-                contentColor = Color.White,
-                shape = MaterialTheme.shapes.extraSmall,
-            )
-        }
 
-        if (preferences.showPlayedProgress && video.playedPercentage > 0) {
+            // Bottom Gradient Shadow overlay for duration readability
             Box(
                 modifier = Modifier
-                    .height(4.dp)
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
+                    .height(24.dp)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                        )
+                    )
+            )
+
+            // Duration Badge (bottom-left)
+            Text(
+                text = video.formattedDuration,
+                color = Color.White,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+            )
+
+            // Animated Equalizer (bottom-right) if active/recently played
+            if (isRecentlyPlayedVideo) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(horizontal = 6.dp, vertical = 3.dp)
+                ) {
+                    AnimatedEqualizer(color = themeColor)
+                }
+            }
+        }
+
+        // Right Side: Title & Metadata Column
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = video.displayName,
+                color = if (isRecentlyPlayedVideo) themeColor else Color.White,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                Text(
+                    text = video.formattedFileSize,
+                    color = Color(0xFF888888),
+                    style = MaterialTheme.typography.bodyMedium
                 )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(video.playedPercentage)
-                        .fillMaxHeight()
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+
+                if (isNew) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFE53935), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = "New",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Far Right: Three-dot dropdown menu
+        Box {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More Options",
+                    tint = Color.White
+                )
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                modifier = Modifier.background(Color(0xFF1E1E1E))
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Play", color = Color.White) },
+                    onClick = {
+                        showMenu = false
+                        onClick()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Rename", color = Color.White) },
+                    onClick = {
+                        showMenu = false
+                        onRenameClick()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Share", color = Color.White) },
+                    onClick = {
+                        showMenu = false
+                        onShareClick()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Info", color = Color.White) },
+                    onClick = {
+                        showMenu = false
+                        onInfoClick()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete", color = Color.White) },
+                    onClick = {
+                        showMenu = false
+                        onDeleteClick()
+                    }
                 )
             }
         }
-    }
-}
-
-@PreviewLightDark
-@Composable
-fun VideoItemRecentlyPlayedPreview() {
-    NextPlayerTheme {
-        Surface {
-            VideoListItem(
-                video = Video.sample,
-                preferences = ApplicationPreferences(),
-                isRecentlyPlayedVideo = true,
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-fun VideoItemPreview() {
-    NextPlayerTheme {
-        Surface {
-            VideoListItem(
-                video = Video.sample,
-                preferences = ApplicationPreferences(),
-                isRecentlyPlayedVideo = false,
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-fun VideoGridItemPreview() {
-    NextPlayerTheme {
-        VideoGridItem(
-            video = Video.sample,
-            preferences = ApplicationPreferences(),
-            isRecentlyPlayedVideo = true,
-        )
     }
 }
