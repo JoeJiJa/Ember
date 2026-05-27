@@ -47,25 +47,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.CheckBox
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Feedback
-import androidx.compose.material.icons.rounded.GridView
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.MusicNote
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Movie
-import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
-import androidx.compose.material.icons.rounded.Widgets
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -683,10 +671,10 @@ fun EmberBottomNavigation(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val tabs: List<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>> = listOf(
-                "Videos" to androidx.compose.material.icons.Icons.Rounded.Movie,
-                "Music" to androidx.compose.material.icons.Icons.Rounded.MusicNote,
-                "Download" to androidx.compose.material.icons.Icons.Rounded.KeyboardArrowDown,
-                "More" to androidx.compose.material.icons.Icons.Rounded.MoreHoriz
+                "Videos" to Icons.Rounded.Movie,
+                "Music" to Icons.Rounded.MusicNote,
+                "Download" to Icons.Rounded.KeyboardArrowDown,
+                "More" to Icons.Rounded.MoreHoriz
             )
 
             tabs.forEach { (tabName, icon) ->
@@ -1155,7 +1143,7 @@ fun MoreOptionsView(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         (1..5).forEach { star ->
                             Icon(
-                                imageVector = if (star <= rating) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                                imageVector = Icons.Rounded.Star,
                                 contentDescription = null,
                                 tint = if (star <= rating) Color(0xFFFFD700) else Color.Gray,
                                 modifier = Modifier
