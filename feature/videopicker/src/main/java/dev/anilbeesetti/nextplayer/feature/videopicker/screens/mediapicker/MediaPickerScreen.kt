@@ -49,12 +49,12 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.Audiotrack
+import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Dashboard
-import androidx.compose.material.icons.rounded.Deselect
 import androidx.compose.material.icons.rounded.Feedback
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.MoreHoriz
@@ -567,7 +567,7 @@ fun DarkTopAppBar(
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = onSelectAllToggle) {
                     Icon(
-                        imageVector = if (isAllSelected) Icons.Rounded.Deselect else Icons.Rounded.SelectAll,
+                        imageVector = if (isAllSelected) Icons.Rounded.CheckBox else Icons.Rounded.SelectAll,
                         contentDescription = "Select All Toggle",
                         tint = Color.White
                     )
@@ -597,7 +597,7 @@ fun DarkTopAppBar(
 
                 IconButton(onClick = onMusicToggle) {
                     Icon(
-                        imageVector = Icons.Rounded.Audiotrack,
+                        imageVector = Icons.Rounded.MusicNote,
                         contentDescription = "Music Toggle",
                         tint = Color.White
                     )
@@ -605,7 +605,7 @@ fun DarkTopAppBar(
 
                 IconButton(onClick = onLayoutToggle) {
                     Icon(
-                        imageVector = Icons.Rounded.Dashboard,
+                        imageVector = Icons.Rounded.GridView,
                         contentDescription = "Layout Toggle",
                         tint = Color.White
                     )
@@ -684,8 +684,8 @@ fun EmberBottomNavigation(
         ) {
             val tabs: List<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>> = listOf(
                 "Videos" to androidx.compose.material.icons.Icons.Rounded.Movie,
-                "Music" to androidx.compose.material.icons.Icons.Rounded.Audiotrack,
-                "Download" to androidx.compose.material.icons.Icons.Rounded.ArrowDownward,
+                "Music" to androidx.compose.material.icons.Icons.Rounded.MusicNote,
+                "Download" to androidx.compose.material.icons.Icons.Rounded.KeyboardArrowDown,
                 "More" to androidx.compose.material.icons.Icons.Rounded.MoreHoriz
             )
 
@@ -803,7 +803,7 @@ fun MusicLibraryView(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Audiotrack,
+                        imageVector = Icons.Rounded.MusicNote,
                         contentDescription = null,
                         tint = themeColor,
                         modifier = Modifier.size(24.dp)
