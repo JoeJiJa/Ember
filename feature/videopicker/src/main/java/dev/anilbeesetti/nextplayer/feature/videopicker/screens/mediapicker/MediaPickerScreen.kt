@@ -1249,7 +1249,7 @@ private fun SelectionActionsSheet(
         enter = slideInVertically { it },
         exit = slideOutVertically { it },
     ) {
-        val shape = MaterialTheme.shapes.largeIncreased.copy(
+        val shape = MaterialTheme.shapes.large.copy(
             bottomStart = ZeroCornerSize,
             bottomEnd = ZeroCornerSize,
         )
