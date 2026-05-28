@@ -126,6 +126,28 @@ class VideoZoomAndContentScaleState(
         }
     }
 
+    private var accumZoom = 1f
+    private var hasTriggeredCycle = false
+
+    fun onPinchStart() {
+        accumZoom = 1f
+        hasTriggeredCycle = false
+    }
+
+    fun onPinchGesture(zoomChange: Float) {
+        if (hasTriggeredCycle) return
+        accumZoom *= zoomChange
+        if (accumZoom > 1.15f || accumZoom < 0.85f) {
+            val nextScale = when (videoContentScale) {
+                VideoContentScale.BEST_FIT -> VideoContentScale.CROP
+                VideoContentScale.CROP -> VideoContentScale.STRETCH
+                else -> VideoContentScale.BEST_FIT
+            }
+            onVideoContentScaleChanged(nextScale)
+            hasTriggeredCycle = true
+        }
+    }
+
     fun onZoomPanGestureEnd() {
         isZooming = false
         updateVideoScaleMetadataAndSendEvent()

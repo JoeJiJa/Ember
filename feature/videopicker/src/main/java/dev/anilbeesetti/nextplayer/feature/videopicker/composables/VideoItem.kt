@@ -50,6 +50,12 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import androidx.compose.ui.composed
+import androidx.compose.animation.core.Animatable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.graphicsLayer
+import dev.anilbeesetti.nextplayer.core.common.Utils
+import kotlinx.coroutines.launch
 import dev.anilbeesetti.nextplayer.core.model.ApplicationPreferences
 import dev.anilbeesetti.nextplayer.core.model.MediaLayoutMode
 import dev.anilbeesetti.nextplayer.core.model.Video
@@ -161,13 +167,14 @@ private fun VideoListItem(
 
     Row(
         modifier = modifier
+            .animateItemEntry(preferences.appAnimations)
             .fillMaxWidth()
             .background(if (selected) themeColor.copy(alpha = 0.15f) else Color.Transparent)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -245,7 +252,7 @@ private fun VideoListItem(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = video.displayName,
+                text = Utils.sanitizeFileName(video.displayName),
                 color = if (isRecentlyPlayedVideo) themeColor else Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold
@@ -260,7 +267,7 @@ private fun VideoListItem(
             ) {
                 Text(
                     text = video.formattedFileSize,
-                    color = Color(0xFF888888),
+                    color = Color(0xFFA0AAB5),
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -334,3 +341,26 @@ private fun VideoListItem(
         }
     }
 }
+
+fun Modifier.animateItemEntry(enabled: Boolean): Modifier = composed {
+    if (!enabled) return@composed this
+
+    val alpha = remember { Animatable(0f) }
+    val yOffset = remember { Animatable(20f) } // Slide up by 20dp
+
+    LaunchedEffect(Unit) {
+        // Run both animations concurrently
+        launch {
+            alpha.animateTo(1f, animationSpec = tween(durationMillis = 350, easing = LinearEasing))
+        }
+        launch {
+            yOffset.animateTo(0f, animationSpec = tween(durationMillis = 350, easing = LinearEasing))
+        }
+    }
+
+    this.graphicsLayer {
+        this.alpha = alpha.value
+        this.translationY = yOffset.value * density
+    }
+}
+

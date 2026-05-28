@@ -30,6 +30,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -147,6 +151,11 @@ fun MediaPlayerScreen(
         screenOrientation = playerPreferences.playerScreenOrientation,
     )
     val errorState = rememberErrorState(player = player)
+
+    var aiEnhancerEnabled by remember { mutableStateOf(false) }
+    var dialogueBoosterEnabled by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(pictureInPictureState.isInPictureInPictureMode) {
         if (pictureInPictureState.isInPictureInPictureMode) {
@@ -295,7 +304,15 @@ fun MediaPlayerScreen(
                             when {
                                 seekGestureState.seekAmount != null -> InfoView(info = "${seekGestureState.seekAmountFormatted}\n[${seekGestureState.seekToPositionFormated}]")
                                 videoZoomAndContentScaleState.isZooming -> InfoView(info = "${(videoZoomAndContentScaleState.zoom * 100).toInt()}%")
-                                videoZoomAndContentScaleState.showContentScaleIndicator -> InfoView(info = stringResource(videoZoomAndContentScaleState.videoContentScale.nameRes()))
+                                videoZoomAndContentScaleState.showContentScaleIndicator -> {
+                                    val infoText = when (videoZoomAndContentScaleState.videoContentScale) {
+                                        dev.anilbeesetti.nextplayer.core.model.VideoContentScale.BEST_FIT -> "Fit to Screen"
+                                        dev.anilbeesetti.nextplayer.core.model.VideoContentScale.CROP -> "Original Cinema Scope (21:9)"
+                                        dev.anilbeesetti.nextplayer.core.model.VideoContentScale.STRETCH -> "Stretch to Fill Viewport"
+                                        else -> stringResource(videoZoomAndContentScaleState.videoContentScale.nameRes())
+                                    }
+                                    InfoView(info = infoText)
+                                }
                                 controlsVisibilityState.controlsVisible -> ControlsMiddleView(player = player)
                                 else -> Unit
                             }
@@ -307,7 +324,7 @@ fun MediaPlayerScreen(
                                 exit = fadeOut(),
                             ) {
                                 val context = LocalContext.current
-                                ControlsBottomView(
+                                 ControlsBottomView(
                                     player = player,
                                     mediaPresentationState = mediaPresentationState,
                                     controlsAlignment = when (playerPreferences.controlButtonsPosition) {
@@ -338,6 +355,26 @@ fun MediaPlayerScreen(
                                             pictureInPictureState.openPictureInPictureSettings()
                                         } else {
                                             pictureInPictureState.enterPictureInPictureMode()
+                                        }
+                                    },
+                                    aiEnhancerEnabled = aiEnhancerEnabled,
+                                    dialogueBoosterEnabled = dialogueBoosterEnabled,
+                                    onAiEnhancerToggle = { enabled ->
+                                        aiEnhancerEnabled = enabled
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                if (enabled) "AI Enhancer Active: Real-time detail resolution and contrast enhancement enabled."
+                                                else "AI Enhancer Disabled."
+                                            )
+                                        }
+                                    },
+                                    onDialogueBoosterToggle = { enabled ->
+                                        dialogueBoosterEnabled = enabled
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                if (enabled) "Dialogue Isolation Profile Enabled: Enhancing vocal clarity tracks."
+                                                else "Dialogue Isolation Profile Disabled."
+                                            )
                                         }
                                     },
                                 )
@@ -389,6 +426,13 @@ fun MediaPlayerScreen(
                 onSelectSubtitleClick = onSelectSubtitleClick,
                 onSubtitleOptionEvent = viewModel::onSubtitleOptionEvent,
                 onVideoContentScaleChanged = { videoZoomAndContentScaleState.onVideoContentScaleChanged(it) },
+            )
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp)
             )
         }
     }

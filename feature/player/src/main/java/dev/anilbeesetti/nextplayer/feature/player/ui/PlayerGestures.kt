@@ -89,13 +89,14 @@ fun PlayerGestures(
                     if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
 
                     detectCustomTransformGestures(
-                        onGesture = { _, panChange, zoomChange, _ ->
+                        onGestureStart = {
+                            videoZoomAndContentScaleState.onPinchStart()
+                        },
+                        onGesture = { _, _, zoomChange, _ ->
                             if (tapGestureState.isLongPressGestureInAction) return@detectCustomTransformGestures
-                            videoZoomAndContentScaleState.onZoomPanGesture(
-                                constraints = this@BoxWithConstraints.constraints,
-                                panChange = panChange,
-                                zoomChange = zoomChange,
-                            )
+                            if (zoomChange != 1f) {
+                                videoZoomAndContentScaleState.onPinchGesture(zoomChange)
+                            }
                         },
                         onGestureEnd = {
                             videoZoomAndContentScaleState.onZoomPanGestureEnd()

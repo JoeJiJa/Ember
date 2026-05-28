@@ -27,6 +27,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.Switch
+import androidx.compose.ui.draw.scale
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -83,6 +88,10 @@ fun ControlsBottomView(
     onPlayInBackgroundClick: () -> Unit,
     onSeek: (Long) -> Unit,
     onSeekEnd: () -> Unit,
+    aiEnhancerEnabled: Boolean,
+    dialogueBoosterEnabled: Boolean,
+    onAiEnhancerToggle: (Boolean) -> Unit,
+    onDialogueBoosterToggle: (Boolean) -> Unit,
 ) {
     val systemBarsPadding = WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues()
     Column(
@@ -91,8 +100,66 @@ fun ControlsBottomView(
             .padding(horizontal = 8.dp)
             .padding(top = 16.dp)
             .padding(bottom = 16.dp.takeIf { systemBarsPadding.calculateBottomPadding() == 0.dp } ?: 0.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // AI Video Enhancer & Dialogue Booster controls
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // AI Video Enhancer
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.noRippleClickable { onAiEnhancerToggle(!aiEnhancerEnabled) }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "AI Video Enhancer",
+                    tint = if (aiEnhancerEnabled) Color(0xFFFFD700) else Color(0xFF888888),
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "AI Enhancer",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = aiEnhancerEnabled,
+                    onCheckedChange = onAiEnhancerToggle,
+                    modifier = Modifier.scale(0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Dialogue Booster
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.noRippleClickable { onDialogueBoosterToggle(!dialogueBoosterEnabled) }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Notifications,
+                    contentDescription = "Dialogue Booster",
+                    tint = if (dialogueBoosterEnabled) Color(0xFF00E676) else Color(0xFF888888),
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Dialogue Booster",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = dialogueBoosterEnabled,
+                    onCheckedChange = onDialogueBoosterToggle,
+                    modifier = Modifier.scale(0.7f)
+                )
+            }
+        }
         Row(
             modifier = Modifier.padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,

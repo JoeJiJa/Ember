@@ -8,6 +8,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Color
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
@@ -40,36 +44,42 @@ fun PlayerContentFrame(
     subtitleConfiguration: SubtitleConfiguration,
 ) {
     val presentationState = rememberPresentationState(player)
-    PlayerSurface(
-        player = player,
-        surfaceType = SURFACE_TYPE_SURFACE_VIEW,
+    Box(
         modifier = modifier
-            .resizeWithContentScale(
-                contentScale = videoZoomAndContentScaleState.videoContentScale.toContentScale(),
-                sourceSizeDp = presentationState.videoSizeDp?.let { size ->
-                    size.copy(
-                        width = with(LocalDensity.current) { size.width.toDp().value },
-                        height = with(LocalDensity.current) { size.height.toDp().value },
-                    )
-                },
-            )
-            .onGloballyPositioned {
-                val bounds = it.boundsInWindow()
-                val rect = Rect(
-                    bounds.left.toInt(),
-                    bounds.top.toInt(),
-                    bounds.right.toInt(),
-                    bounds.bottom.toInt(),
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        PlayerSurface(
+            player = player,
+            surfaceType = SURFACE_TYPE_SURFACE_VIEW,
+            modifier = Modifier
+                .resizeWithContentScale(
+                    contentScale = videoZoomAndContentScaleState.videoContentScale.toContentScale(),
+                    sourceSizeDp = presentationState.videoSizeDp?.let { size ->
+                        size.copy(
+                            width = with(LocalDensity.current) { size.width.toDp().value },
+                            height = with(LocalDensity.current) { size.height.toDp().value },
+                        )
+                    },
                 )
-                pictureInPictureState.setVideoViewRect(rect)
-            }
-            .graphicsLayer {
-                scaleX = videoZoomAndContentScaleState.zoom
-                scaleY = videoZoomAndContentScaleState.zoom
-                translationX = videoZoomAndContentScaleState.offset.x
-                translationY = videoZoomAndContentScaleState.offset.y
-            },
-    )
+                .onGloballyPositioned {
+                    val bounds = it.boundsInWindow()
+                    val rect = Rect(
+                        bounds.left.toInt(),
+                        bounds.top.toInt(),
+                        bounds.right.toInt(),
+                        bounds.bottom.toInt(),
+                    )
+                    pictureInPictureState.setVideoViewRect(rect)
+                }
+                .graphicsLayer {
+                    scaleX = videoZoomAndContentScaleState.zoom
+                    scaleY = videoZoomAndContentScaleState.zoom
+                    translationX = videoZoomAndContentScaleState.offset.x
+                    translationY = videoZoomAndContentScaleState.offset.y
+                },
+        )
+    }
 
     PlayerGestures(
         controlsVisibilityState = controlsVisibilityState,

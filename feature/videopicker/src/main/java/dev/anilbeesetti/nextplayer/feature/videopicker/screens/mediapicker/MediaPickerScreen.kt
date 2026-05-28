@@ -103,6 +103,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.foundation.layout.statusBars
+import dev.anilbeesetti.nextplayer.core.common.Utils
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -206,50 +211,6 @@ internal fun MediaPickerScreen(
     val totalItemsSize = (uiState.mediaDataState as? DataState.Success)?.value?.run { folderList.size + mediaList.size } ?: 0
 
     Scaffold(
-        topBar = {
-            Column(modifier = Modifier.background(Color(0xFF0C0C0C))) {
-                DarkTopAppBar(
-                    title = uiState.folderName ?: "Ember",
-                    showBackButton = uiState.folderName != null,
-                    onNavigateUp = onNavigateUp,
-                    onMusicToggle = { activeTab = "Music" },
-                    onLayoutToggle = {
-                        val currentMode = uiState.preferences.mediaLayoutMode
-                        onEvent(
-                            MediaPickerUiEvent.UpdateMenu(
-                                uiState.preferences.copy(
-                                    mediaLayoutMode = if (currentMode == MediaLayoutMode.LIST) MediaLayoutMode.GRID else MediaLayoutMode.LIST
-                                )
-                            )
-                        )
-                    },
-                    onSearchClick = onSearchClick,
-                    isInSelectionMode = selectionManager.isInSelectionMode,
-                    selectedCount = selectedItemsSize,
-                    totalCount = totalItemsSize,
-                    onClearSelection = { selectionManager.exitSelectionMode() },
-                    onSelectAllToggle = {
-                        if (selectedItemsSize != totalItemsSize) {
-                            (uiState.mediaDataState as? DataState.Success)?.value?.let { folder ->
-                                folder.folderList.forEach { selectionManager.selectFolder(it) }
-                                folder.mediaList.forEach { selectionManager.selectVideo(it) }
-                            }
-                        } else {
-                            selectionManager.clearSelection()
-                        }
-                    },
-                    isAllSelected = selectedItemsSize == totalItemsSize
-                )
-                
-                if (activeTab == "Videos") {
-                    CategoryFilterRow(
-                        selectedCategory = selectedCategory,
-                        onCategorySelected = { selectedCategory = it },
-                        themeColor = themeColor
-                    )
-                }
-            }
-        },
         bottomBar = {
             if (selectionManager.isInSelectionMode) {
                 SelectionActionsSheet(
@@ -368,93 +329,170 @@ internal fun MediaPickerScreen(
         },
         containerColor = Color(0xFF0C0C0C),
     ) { scaffoldPadding ->
-        Surface(
-            color = Color(0xFF0C0C0C),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            when (activeTab) {
-                "Videos" -> {
-                    AnimatedContent(
-                        targetState = selectedCategory,
-                        transitionSpec = {
-                            val categories = listOf("All", "Folders", "Videos")
-                            val initialIndex = categories.indexOf(initialState)
-                            val targetIndex = categories.indexOf(targetState)
-                            if (targetIndex > initialIndex) {
-                                (slideInHorizontally { width -> width } + fadeIn()) togetherWith 
-                                (slideOutHorizontally { width -> -width } + fadeOut())
-                            } else {
-                                (slideInHorizontally { width -> -width } + fadeIn()) togetherWith 
-                                (slideOutHorizontally { width -> width } + fadeOut())
-                            }
-                        },
-                        label = "categoryTransition",
-                        modifier = Modifier.padding(scaffoldPadding)
-                    ) { category ->
-                        when (uiState.mediaDataState) {
-                            is DataState.Error -> {}
-                            is DataState.Loading -> {
-                                CenterCircularProgressBar()
-                            }
-                            is DataState.Success -> {
-                                val rootFolder = uiState.mediaDataState.value
-                                if (rootFolder == null || (rootFolder.folderList.isEmpty() && rootFolder.mediaList.isEmpty())) {
-                                    NoVideosFound(contentPadding = scaffoldPadding)
+        val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val topPadding = (if (activeTab == "Videos") 128.dp else 72.dp) + statusBarPadding
+        
+        Box(modifier = Modifier.fillMaxSize()) {
+            Surface(
+                color = Color(0xFF0C0C0C),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when (activeTab) {
+                    "Videos" -> {
+                        AnimatedContent(
+                            targetState = selectedCategory,
+                            transitionSpec = {
+                                val categories = listOf("All", "Folders", "Videos")
+                                val initialIndex = categories.indexOf(initialState)
+                                val targetIndex = categories.indexOf(targetState)
+                                if (uiState.preferences.appAnimations) {
+                                    if (targetIndex > initialIndex) {
+                                        (slideInHorizontally { width -> width } + fadeIn()) togetherWith 
+                                        (slideOutHorizontally { width -> -width } + fadeOut())
+                                    } else {
+                                        (slideInHorizontally { width -> -width } + fadeIn()) togetherWith 
+                                        (slideOutHorizontally { width -> width } + fadeOut())
+                                    }
                                 } else {
-                                    PermissionMissingView(
-                                        isGranted = permissionState.status.isGranted,
-                                        showRationale = permissionState.status.shouldShowRationale,
-                                        permission = permissionState.permission,
-                                        launchPermissionRequest = { permissionState.launchPermissionRequest() },
-                                    ) {
-                                        MediaView(
-                                            rootFolder = rootFolder,
-                                            preferences = uiState.preferences,
-                                            selectedCategory = category,
-                                            contentPadding = PaddingValues(0.dp),
-                                            selectionManager = selectionManager,
-                                            lazyGridState = lazyGridState,
-                                            onFolderClick = onFolderClick,
-                                            onVideoClick = { onPlayVideo(it) },
-                                            onVideoLoaded = { onEvent(MediaPickerUiEvent.AddToSync(it)) },
-                                            onRenameClick = { showRenameActionFor = it },
-                                            onShareClick = { onEvent(MediaPickerUiEvent.ShareVideos(listOf(it.uriString))) },
-                                            onInfoClick = { showInfoActionFor = it },
-                                            onDeleteClick = {
-                                                if (MediaService.willSystemAsksForDeleteConfirmation()) {
-                                                    onEvent(MediaPickerUiEvent.DeleteVideos(listOf(it.uriString)))
-                                                } else {
-                                                    selectionManager.selectVideo(it)
-                                                    showDeleteVideosConfirmation = true
-                                                }
-                                            },
-                                            themeColor = themeColor
+                                    androidx.compose.animation.EnterTransition.None togetherWith 
+                                    androidx.compose.animation.ExitTransition.None
+                                }
+                            },
+                            label = "categoryTransition",
+                            modifier = Modifier.padding(bottom = scaffoldPadding.calculateBottomPadding())
+                        ) { category ->
+                            when (uiState.mediaDataState) {
+                                is DataState.Error -> {}
+                                is DataState.Loading -> {
+                                    CenterCircularProgressBar()
+                                }
+                                is DataState.Success -> {
+                                    val rootFolder = uiState.mediaDataState.value
+                                    if (rootFolder == null || (rootFolder.folderList.isEmpty() && rootFolder.mediaList.isEmpty())) {
+                                        NoVideosFound(
+                                            contentPadding = PaddingValues(
+                                                top = topPadding,
+                                                bottom = scaffoldPadding.calculateBottomPadding() + 16.dp
+                                            )
                                         )
+                                    } else {
+                                        PermissionMissingView(
+                                            isGranted = permissionState.status.isGranted,
+                                            showRationale = permissionState.status.shouldShowRationale,
+                                            permission = permissionState.permission,
+                                            launchPermissionRequest = { permissionState.launchPermissionRequest() },
+                                        ) {
+                                            MediaView(
+                                                rootFolder = rootFolder,
+                                                preferences = uiState.preferences,
+                                                selectedCategory = category,
+                                                contentPadding = PaddingValues(
+                                                    top = topPadding,
+                                                    bottom = scaffoldPadding.calculateBottomPadding() + 80.dp,
+                                                    start = 0.dp,
+                                                    end = 0.dp
+                                                ),
+                                                selectionManager = selectionManager,
+                                                lazyGridState = lazyGridState,
+                                                onFolderClick = onFolderClick,
+                                                onVideoClick = { onPlayVideo(it) },
+                                                onVideoLoaded = { onEvent(MediaPickerUiEvent.AddToSync(it)) },
+                                                onRenameClick = { showRenameActionFor = it },
+                                                onShareClick = { onEvent(MediaPickerUiEvent.ShareVideos(listOf(it.uriString))) },
+                                                onInfoClick = { showInfoActionFor = it },
+                                                onDeleteClick = {
+                                                    if (MediaService.willSystemAsksForDeleteConfirmation()) {
+                                                        onEvent(MediaPickerUiEvent.DeleteVideos(listOf(it.uriString)))
+                                                    } else {
+                                                        selectionManager.selectVideo(it)
+                                                        showDeleteVideosConfirmation = true
+                                                    }
+                                                },
+                                                themeColor = themeColor
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                "Music" -> {
-                    Box(modifier = Modifier.padding(scaffoldPadding)) {
-                        MusicLibraryView(themeColor = themeColor)
+                    "Music" -> {
+                        Box(modifier = Modifier.padding(top = topPadding, bottom = scaffoldPadding.calculateBottomPadding())) {
+                            MusicLibraryView(themeColor = themeColor)
+                        }
+                    }
+                    "Download" -> {
+                        Box(modifier = Modifier.padding(top = topPadding, bottom = scaffoldPadding.calculateBottomPadding())) {
+                            BrowserDownloaderView(themeColor = themeColor)
+                        }
+                    }
+                    "More" -> {
+                        Box(modifier = Modifier.padding(top = topPadding, bottom = scaffoldPadding.calculateBottomPadding())) {
+                            MoreOptionsView(
+                                themeColor = themeColor,
+                                themeColorName = themeColorName,
+                                onThemeChange = { themeColorName = it },
+                                onSettingsClick = onSettingsClick
+                            )
+                        }
                     }
                 }
-                "Download" -> {
-                    Box(modifier = Modifier.padding(scaffoldPadding)) {
-                        BrowserDownloaderView(themeColor = themeColor)
-                    }
-                }
-                "More" -> {
-                    Box(modifier = Modifier.padding(scaffoldPadding)) {
-                        MoreOptionsView(
-                            themeColor = themeColor,
-                            themeColorName = themeColorName,
-                            onThemeChange = { themeColorName = it },
-                            onSettingsClick = onSettingsClick
+            }
+
+            // Draw Floating Glassmorphic Header Banner
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xC80C0C0C)) // Dynamic glassmorphic semi-transparent background
+                    .drawBehind {
+                        // Subtle bottom white border overlay
+                        drawLine(
+                            color = Color(0x1AFFFFFF), // 10% opacity white
+                            start = Offset(0f, size.height),
+                            end = Offset(size.width, size.height),
+                            strokeWidth = 1.dp.toPx()
                         )
                     }
+            ) {
+                DarkTopAppBar(
+                    title = uiState.folderName ?: "Ember",
+                    showBackButton = uiState.folderName != null,
+                    onNavigateUp = onNavigateUp,
+                    onMusicToggle = { activeTab = "Music" },
+                    onLayoutToggle = {
+                        val currentMode = uiState.preferences.mediaLayoutMode
+                        onEvent(
+                            MediaPickerUiEvent.UpdateMenu(
+                                uiState.preferences.copy(
+                                    mediaLayoutMode = if (currentMode == MediaLayoutMode.LIST) MediaLayoutMode.GRID else MediaLayoutMode.LIST
+                                )
+                            )
+                        )
+                    },
+                    onSearchClick = onSearchClick,
+                    isInSelectionMode = selectionManager.isInSelectionMode,
+                    selectedCount = selectedItemsSize,
+                    totalCount = totalItemsSize,
+                    onClearSelection = { selectionManager.exitSelectionMode() },
+                    onSelectAllToggle = {
+                        if (selectedItemsSize != totalItemsSize) {
+                            (uiState.mediaDataState as? DataState.Success)?.value?.let { folder ->
+                                folder.folderList.forEach { selectionManager.selectFolder(it) }
+                                folder.mediaList.forEach { selectionManager.selectVideo(it) }
+                            }
+                        } else {
+                            selectionManager.clearSelection()
+                        }
+                    },
+                    isAllSelected = selectedItemsSize == totalItemsSize
+                )
+                
+                if (activeTab == "Videos") {
+                    CategoryFilterRow(
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { selectedCategory = it },
+                        themeColor = themeColor
+                    )
                 }
             }
         }
@@ -581,15 +619,17 @@ fun DarkTopAppBar(
                 }
 
                 Text(
-                    text = title.uppercase(Locale.getDefault()),
+                    text = Utils.sanitizeTitle(title),
                     color = Color.White,
+                    fontFamily = FontFamily.SansSerif,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp
-                    )
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier.weight(1f)
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
 
                 IconButton(onClick = onMusicToggle) {
                     Icon(
@@ -634,9 +674,9 @@ fun CategoryFilterRow(
     ) {
         items(categories) { category ->
             val isSelected = selectedCategory == category
-            val backgroundColor = if (isSelected) themeColor else Color(0xFF1E1E1E)
+            val backgroundColor = if (isSelected) themeColor else Color(0x1FFFFFFF)
             val textColor = if (isSelected) Color.White else Color(0xFFB0B0B0)
-            val borderModifier = if (isSelected) Modifier else Modifier.border(0.5.dp, Color(0xFF333333), RoundedCornerShape(20.dp))
+            val borderModifier = if (isSelected) Modifier else Modifier.border(0.5.dp, Color(0x24FFFFFF), RoundedCornerShape(20.dp))
 
             Box(
                 modifier = Modifier

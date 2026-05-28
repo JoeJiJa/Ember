@@ -98,7 +98,7 @@ private fun AppearancePreferencesContent(
                     icon = NextIcons.Contrast,
                     isChecked = uiState.preferences.useHighContrastDarkTheme,
                     onClick = { onEvent(AppearancePreferencesEvent.ToggleUseHighContrastDarkTheme) },
-                    isLastItem = !supportsDynamicTheming()
+                    isLastItem = false
                 )
                 if (supportsDynamicTheming()) {
                     PreferenceSwitch(
@@ -107,9 +107,17 @@ private fun AppearancePreferencesContent(
                         icon = NextIcons.Appearance,
                         isChecked = uiState.preferences.useDynamicColors,
                         onClick = { onEvent(AppearancePreferencesEvent.ToggleUseDynamicColors) },
-                        isLastItem = true
+                        isLastItem = false
                     )
                 }
+                PreferenceSwitch(
+                    title = "App Animations",
+                    description = "Enable smooth interface transitions and motion effects",
+                    icon = NextIcons.Rotation,
+                    isChecked = uiState.preferences.appAnimations,
+                    onClick = { onEvent(AppearancePreferencesEvent.ToggleAppAnimations) },
+                    isLastItem = true
+                )
             }
         }
 

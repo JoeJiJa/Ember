@@ -40,6 +40,7 @@ class AppearancePreferencesViewModel @Inject constructor(
             is AppearancePreferencesEvent.UpdateThemeConfig -> updateThemeConfig(event.themeConfig)
             AppearancePreferencesEvent.ToggleUseDynamicColors -> toggleUseDynamicColors()
             AppearancePreferencesEvent.ToggleUseHighContrastDarkTheme -> toggleUseHighContrastDarkTheme()
+            AppearancePreferencesEvent.ToggleAppAnimations -> toggleAppAnimations()
         }
     }
 
@@ -82,6 +83,14 @@ class AppearancePreferencesViewModel @Inject constructor(
             }
         }
     }
+
+    private fun toggleAppAnimations() {
+        viewModelScope.launch {
+            preferencesRepository.updateApplicationPreferences {
+                it.copy(appAnimations = !it.appAnimations)
+            }
+        }
+    }
 }
 
 @Stable
@@ -96,6 +105,7 @@ sealed interface AppearancePreferencesEvent {
     data class UpdateThemeConfig(val themeConfig: ThemeConfig) : AppearancePreferencesEvent
     data object ToggleUseDynamicColors : AppearancePreferencesEvent
     data object ToggleUseHighContrastDarkTheme : AppearancePreferencesEvent
+    data object ToggleAppAnimations : AppearancePreferencesEvent
 }
 
 sealed interface AppearancePreferenceDialog {

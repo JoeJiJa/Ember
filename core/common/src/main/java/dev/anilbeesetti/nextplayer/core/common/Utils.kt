@@ -86,4 +86,68 @@ object Utils {
     fun formatLanguage(language: String?): String? {
         return language?.let { lang -> Locale.forLanguageTag(lang).displayLanguage.takeIf { it.isNotEmpty() } }
     }
+
+    fun sanitizeTitle(title: String): String {
+        var clean = title
+        
+        // Regex for domain patterns (e.g. www.site.com, site.live, site.futbol, etc.)
+        val domainRegex = "(?i)(www\\.)?[\\w-]+\\.(futbol|live|pm|cool|com|org|net|xyz|me|info|tv|in|co|ws|biz|cc|net)\\b".toRegex()
+        clean = domainRegex.replace(clean, "")
+
+        // Replace hyphens, dots, underscores, brackets with space
+        clean = clean.replace(listOf(".", "-", "_", "[", "]", "(", ")"), " ")
+
+        // Replace multiple spaces with a single space
+        clean = clean.replace("\\s+".toRegex(), " ").trim()
+
+        // Capitalize words for premium look
+        clean = clean.split(" ").joinToString(" ") { word ->
+            word.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        }
+
+        return if (clean.isEmpty()) title else clean
+    }
+
+    fun sanitizeFileName(name: String): String {
+        var clean = name
+        // Strip file extension if present at the end
+        val extIndex = clean.lastIndexOf('.')
+        if (extIndex > clean.length - 6 && extIndex > 0) {
+            clean = clean.substring(0, extIndex)
+        }
+
+        // Regex for domain patterns
+        val domainRegex = "(?i)(www\\.)?[\\w-]+\\.(futbol|live|pm|cool|com|org|net|xyz|me|info|tv|in|co|ws|biz|cc|net)\\b".toRegex()
+        clean = domainRegex.replace(clean, "")
+
+        // Regex for quality/codec/source tags
+        val tagsRegex = "(?i)\\b(1080p|720p|480p|2160p|4k|x264|x265|hevc|h264|h265|web-dl|webdl|bluray|hdrip|webrip|dvdrip|dd5\\.1|dual[- ]audio|multi|hq|aac|mkv|mp4|avi|hdr|hdtv)\\b".toRegex()
+        clean = tagsRegex.replace(clean, "")
+
+        // Replace hyphens, dots, underscores, brackets with space
+        clean = clean.replace(listOf(".", "-", "_", "[", "]", "(", ")"), " ")
+
+        // Replace multiple spaces with a single space
+        clean = clean.replace("\\s+".toRegex(), " ").trim()
+
+        // Capitalize words for premium look
+        clean = clean.split(" ").joinToString(" ") { word ->
+            if (word.matches("(?i)S\\d+E\\d+".toRegex())) {
+                word.uppercase()
+            } else {
+                word.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+            }
+        }
+
+        // If the result is empty, return original name
+        return if (clean.isEmpty()) name else clean
+    }
+
+    private fun String.replace(chars: List<String>, replacement: String): String {
+        var result = this
+        for (c in chars) {
+            result = result.replace(c, replacement)
+        }
+        return result
+    }
 }
