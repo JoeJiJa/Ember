@@ -1,23 +1,4 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillType="evenOdd"
-        android:pathData="M 54 18 C 54 18, 30 45, 30 66 C 30 79.25, 40.75 90, 54 90 C 67.25 90, 78 79.25, 78 66 C 78 45, 54 18, 54 18 Z M 44 48 L 68 62 L 44 76 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:startX="54"
-                android:startY="18"
-                android:endX="54"
-                android:endY="90"
-                android:type="linear">
-                <item android:offset="0.0" android:color="#FFFF3F00"/>
-                <item android:offset="0.5" android:color="#FFFF7F00"/>
-                <item android:offset="1.0" android:color="#FFFFD000"/>
-            </gradient>
-        </aapt:attr>
-    </path>
-</vector>
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@mipmap/ic_launcher_foreground" android:gravity="center" />
+</layer-list>
