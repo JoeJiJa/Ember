@@ -1,4 +1,6 @@
-![Ember Banner](fastlane/metadata/android/en-US/images/featureGraphic.png)
+<p align="center">
+  <img src="app/src/main/res/drawable/ic_splash_icon.png" width="128" alt="Ember Icon"/>
+</p>
 
 # Ember
 
