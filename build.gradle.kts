@@ -12,6 +12,23 @@ plugins {
     alias(libs.plugins.ktlint) apply false
 }
 
+subprojects {
+    apply(plugin = rootProject.libs.plugins.ktlint.get().pluginId)
+    apply(plugin = rootProject.libs.plugins.aboutLibraries.get().pluginId)
+
+    configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+        android.set(true)
+        outputColorName.set("RED")
+        ignoreFailures.set(false)
+    }
+
+    configure<com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension> {
+        export {
+            excludeFields.addAll("generated")
+        }
+    }
+}
+
 allprojects {
     tasks.withType<Test>().configureEach {
         testLogging {
