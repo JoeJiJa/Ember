@@ -16,9 +16,9 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        applicationId = "dev.anilbeesetti.nextplayer"
-        versionCode = 56
-        versionName = "0.16.3"
+        applicationId = "dev.joejija.ember"
+        versionCode = 57
+        versionName = "2.0.1"
     }
 
     buildFeatures {
@@ -33,12 +33,9 @@ android {
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debug")
         }
 
         getByName("debug") {
