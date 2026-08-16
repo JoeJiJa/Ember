@@ -12,13 +12,6 @@ plugins {
     alias(libs.plugins.ktlint) apply false
 }
 
-subprojects {
-    apply(plugin = rootProject.libs.plugins.aboutLibraries.get().pluginId)
-
-    configure<com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension> {
-    }
-}
-
 allprojects {
     tasks.withType<Test>().configureEach {
         testLogging {
