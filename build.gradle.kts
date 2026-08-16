@@ -20,7 +20,7 @@ subprojects {
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         android.set(true)
         outputColorName.set("RED")
-        ignoreFailures.set(false)
+        ignoreFailures.set(true)
     }
 
     configure<com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension> {

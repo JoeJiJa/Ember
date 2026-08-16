@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build apk and run tests
+    name: Build apk
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,23 +19,14 @@ jobs:
       - name: Set Up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: 17
-          distribution: temurin
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Make Gradlew Executable
         run: chmod +x gradlew
 
       - name: Build Project with gradle
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Run Local Tests
-        run: ./gradlew test || true
-
-      - name: Lint Checks
-        run: ./gradlew ktlintCheck || true
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4

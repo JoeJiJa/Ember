@@ -22,13 +22,19 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
       - name: Grant execution permissions to Gradle wrapper
         run: chmod +x gradlew
 
       - name: Build Release APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload Debug APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ember-debug-apks-${{ github.ref_name }}
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: ignore
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

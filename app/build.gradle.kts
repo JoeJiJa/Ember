@@ -17,8 +17,8 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         applicationId = "dev.joejija.ember"
-        versionCode = 57
-        versionName = "2.0.1"
+        versionCode = 58
+        versionName = "2.0.2"
     }
 
     buildFeatures {
