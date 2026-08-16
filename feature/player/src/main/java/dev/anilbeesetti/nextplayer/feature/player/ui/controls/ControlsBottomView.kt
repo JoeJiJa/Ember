@@ -88,10 +88,15 @@ fun ControlsBottomView(
     onPlayInBackgroundClick: () -> Unit,
     onSeek: (Long) -> Unit,
     onSeekEnd: () -> Unit,
-    aiEnhancerEnabled: Boolean,
-    dialogueBoosterEnabled: Boolean,
-    onAiEnhancerToggle: (Boolean) -> Unit,
-    onDialogueBoosterToggle: (Boolean) -> Unit,
+    aiEnhancerEnabled: Boolean = false,
+    dialogueBoosterEnabled: Boolean = false,
+    onAiEnhancerToggle: (Boolean) -> Unit = {},
+    onDialogueBoosterToggle: (Boolean) -> Unit = {},
+    onEqualizerClick: () -> Unit = {},
+    onAudioSyncClick: () -> Unit = {},
+    onOnlineSubtitlesClick: () -> Unit = {},
+    onAbRepeatClick: () -> Unit = {},
+    onSnapshotClick: () -> Unit = {},
 ) {
     val systemBarsPadding = WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues()
     Column(

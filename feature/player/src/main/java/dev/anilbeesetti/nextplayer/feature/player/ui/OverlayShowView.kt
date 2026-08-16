@@ -26,6 +26,11 @@ fun BoxScope.OverlayShowView(
     onSubtitleTextSizeChange: (Int) -> Unit = {},
     onSubtitleTextColorChange: (String) -> Unit = {},
     onSubtitleBackgroundColorChange: (String) -> Unit = {},
+    equalizerManager: dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager = androidx.compose.runtime.remember { dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager() },
+    currentAudioSyncOffsetMs: Long = 0L,
+    onAudioSyncOffsetChange: (Long) -> Unit = {},
+    videoTitle: String = "",
+    onOnlineSubtitleSelected: (dev.anilbeesetti.nextplayer.feature.player.ui.OnlineSubtitleResult) -> Unit = {},
 ) {
     Box(
         modifier = Modifier
@@ -81,6 +86,26 @@ fun BoxScope.OverlayShowView(
         show = overlayView == OverlayView.PLAYLIST,
         player = player,
     )
+
+    EqualizerDialogView(
+        show = overlayView == OverlayView.EQUALIZER,
+        equalizerManager = equalizerManager,
+        onDismiss = onDismiss,
+    )
+
+    AudioSyncDialogView(
+        show = overlayView == OverlayView.AUDIO_SYNC,
+        currentOffsetMs = currentAudioSyncOffsetMs,
+        onOffsetChange = onAudioSyncOffsetChange,
+        onDismiss = onDismiss,
+    )
+
+    OnlineSubtitleDialogView(
+        show = overlayView == OverlayView.ONLINE_SUBTITLES,
+        videoTitle = videoTitle,
+        onSubtitleSelected = onOnlineSubtitleSelected,
+        onDismiss = onDismiss,
+    )
 }
 
 val Configuration.isPortrait: Boolean
@@ -93,4 +118,7 @@ enum class OverlayView {
     PLAYBACK_SPEED,
     VIDEO_CONTENT_SCALE,
     PLAYLIST,
+    EQUALIZER,
+    AUDIO_SYNC,
+    ONLINE_SUBTITLES,
 }
