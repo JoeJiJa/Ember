@@ -30,7 +30,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Release APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          ./gradlew assembleDebug --stacktrace > build.log 2>&1 || (ERR=$(grep -A 25 "\* What went wrong:" build.log | tr '\n' ' '); echo "::error::$ERR" && cat build.log | tail -n 150 && exit 1)
 
       - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4
