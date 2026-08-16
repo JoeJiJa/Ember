@@ -487,6 +487,9 @@ fun MediaPlayerScreen(
                 }
             }
 
+            val equalizerManager = remember { dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager() }
+            var audioSyncOffsetMs by remember { mutableStateOf(0L) }
+
             OverlayShowView(
                 player = player,
                 overlayView = overlayView,
@@ -502,6 +505,10 @@ fun MediaPlayerScreen(
                 onSubtitleTextSizeChange = viewModel::updateSubtitleTextSize,
                 onSubtitleTextColorChange = viewModel::updateSubtitleTextColor,
                 onSubtitleBackgroundColorChange = viewModel::updateSubtitleBackgroundColor,
+                equalizerManager = equalizerManager,
+                currentAudioSyncOffsetMs = audioSyncOffsetMs,
+                onAudioSyncOffsetChange = { audioSyncOffsetMs = it },
+                videoTitle = metadataState.title ?: "",
             )
 
             SnackbarHost(
