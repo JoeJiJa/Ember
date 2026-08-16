@@ -837,7 +837,7 @@ fun MusicLibraryView(
                     .background(Color(0xFF1E1E1E), RoundedCornerShape(12.dp))
                     .clickable {
                         if (song.uriString.isNotEmpty()) {
-                            onPlaySong(song.uriString.toUri())
+                            onPlaySong(Uri.parse(song.uriString))
                         } else {
                             android.widget.Toast.makeText(context, "Playing sample: ${song.title}", android.widget.Toast.LENGTH_SHORT).show()
                         }

@@ -343,8 +343,9 @@ class PlayerService : MediaSessionService() {
 
     fun applyAiEnhancer(enabled: Boolean) {
         try {
-            if (loudnessEnhancer == null && mediaSession?.player?.audioSessionId != null) {
-                val sessionId = mediaSession?.player?.audioSessionId ?: return
+            val exoPlayer = mediaSession?.player as? ExoPlayer
+            if (loudnessEnhancer == null && exoPlayer != null) {
+                val sessionId = exoPlayer.audioSessionId
                 if (sessionId != C.AUDIO_SESSION_ID_UNSET) {
                     loudnessEnhancer = LoudnessEnhancer(sessionId)
                 }
