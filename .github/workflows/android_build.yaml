@@ -28,6 +28,13 @@ jobs:
       - name: Build Project with gradle
         run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build_output.txt; exit ${PIPESTATUS[0]}
 
+      - name: Print Error Log on Failure
+        if: failure()
+        run: |
+          echo "=================== ERROR LOG SUMMARY ==================="
+          grep -i -E "error:|FAILED|Exception|Caused by:" build_output.txt -A 10 -B 2 || tail -n 120 build_output.txt
+          echo "========================================================="
+
       - name: Upload Build Log (always)
         if: always()
         uses: actions/upload-artifact@v4
