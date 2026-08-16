@@ -27,7 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Release APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build_output.txt; exit ${PIPESTATUS[0]}
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Print Full Build Log on Failure
         if: failure()
