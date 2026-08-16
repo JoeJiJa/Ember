@@ -31,7 +31,7 @@ jobs:
 
       - name: Build Release APK
         run: |
-          ./gradlew assembleDebug --stacktrace > build.log 2>&1 || (echo "::error::$(tail -n 30 build.log)" && cat build.log | tail -n 150 && exit 1)
+          ./gradlew assembleDebug --stacktrace > build.log 2>&1 || (ERR=$(tail -n 30 build.log | tr '\n' ' '); echo "::error::$ERR" && cat build.log | tail -n 150 && exit 1)
 
       - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4
