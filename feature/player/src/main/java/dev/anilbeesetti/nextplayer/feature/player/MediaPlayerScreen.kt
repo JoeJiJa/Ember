@@ -1,0 +1,612 @@
+package dev.anilbeesetti.nextplayer.feature.player
+
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import dev.anilbeesetti.nextplayer.core.model.ControlButtonsPosition
+import dev.anilbeesetti.nextplayer.core.model.PlayerPreferences
+import dev.anilbeesetti.nextplayer.core.ui.R as coreUiR
+import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
+import dev.anilbeesetti.nextplayer.feature.player.buttons.NextButton
+import dev.anilbeesetti.nextplayer.feature.player.buttons.PlayPauseButton
+import dev.anilbeesetti.nextplayer.feature.player.buttons.PlayerButton
+import dev.anilbeesetti.nextplayer.feature.player.buttons.PreviousButton
+import dev.anilbeesetti.nextplayer.feature.player.state.ControlsVisibilityState
+import dev.anilbeesetti.nextplayer.feature.player.state.VerticalGesture
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberBrightnessState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberControlsVisibilityState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberErrorState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberMediaPresentationState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberMetadataState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberPictureInPictureState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberRotationState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberSeekGestureState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberTapGestureState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberVideoZoomAndContentScaleState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberVolumeAndBrightnessGestureState
+import dev.anilbeesetti.nextplayer.feature.player.state.rememberVolumeState
+import dev.anilbeesetti.nextplayer.feature.player.extensions.nameRes
+import dev.anilbeesetti.nextplayer.feature.player.state.seekAmountFormatted
+import dev.anilbeesetti.nextplayer.feature.player.state.seekToPositionFormated
+import dev.anilbeesetti.nextplayer.feature.player.ui.DoubleTapIndicator
+import dev.anilbeesetti.nextplayer.feature.player.ui.OverlayShowView
+import dev.anilbeesetti.nextplayer.feature.player.ui.OverlayView
+import dev.anilbeesetti.nextplayer.feature.player.ui.SubtitleConfiguration
+import dev.anilbeesetti.nextplayer.feature.player.ui.VerticalProgressView
+import dev.anilbeesetti.nextplayer.feature.player.ui.controls.ControlsBottomView
+import dev.anilbeesetti.nextplayer.feature.player.ui.controls.ControlsTopView
+import kotlin.time.Duration.Companion.seconds
+
+val LocalControlsVisibilityState = compositionLocalOf<ControlsVisibilityState?> { null }
+
+@OptIn(UnstableApi::class)
+@Composable
+fun MediaPlayerScreen(
+    player: Player?,
+    viewModel: PlayerViewModel,
+    playerPreferences: PlayerPreferences,
+    modifier: Modifier = Modifier,
+    onSelectSubtitleClick: () -> Unit,
+    onBackClick: () -> Unit,
+    onPlayInBackgroundClick: () -> Unit,
+) {
+    val volumeState = rememberVolumeState(
+        player = player,
+        showVolumePanelIfHeadsetIsOn = playerPreferences.showSystemVolumePanel,
+    )
+    player ?: return
+    val metadataState = rememberMetadataState(player)
+    val mediaPresentationState = rememberMediaPresentationState(player)
+    val controlsVisibilityState = rememberControlsVisibilityState(
+        player = player,
+        hideAfter = playerPreferences.controllerAutoHideTimeout.seconds,
+    )
+    val tapGestureState = rememberTapGestureState(
+        player = player,
+        doubleTapGesture = playerPreferences.doubleTapGesture,
+        seekIncrementMillis = playerPreferences.seekIncrement.seconds.inWholeMilliseconds,
+        useLongPressGesture = playerPreferences.useLongPressControls,
+        longPressSpeed = playerPreferences.longPressControlsSpeed,
+    )
+    val seekGestureState = rememberSeekGestureState(
+        player = player,
+        sensitivity = playerPreferences.seekSensitivity,
+        enableSeekGesture = playerPreferences.useSeekControls,
+    )
+    val pictureInPictureState = rememberPictureInPictureState(
+        player = player,
+        autoEnter = playerPreferences.autoPip,
+    )
+    val videoZoomAndContentScaleState = rememberVideoZoomAndContentScaleState(
+        player = player,
+        initialContentScale = playerPreferences.playerVideoZoom,
+        enableZoomGesture = playerPreferences.useZoomControls,
+        enablePanGesture = playerPreferences.enablePanGesture,
+        onEvent = viewModel::onVideoZoomEvent,
+    )
+    val brightnessState = rememberBrightnessState()
+    val volumeAndBrightnessGestureState = rememberVolumeAndBrightnessGestureState(
+        volumeState = volumeState,
+        brightnessState = brightnessState,
+        enableVolumeGesture = playerPreferences.enableVolumeSwipeGesture,
+        enableBrightnessGesture = playerPreferences.enableBrightnessSwipeGesture,
+        volumeGestureSensitivity = playerPreferences.volumeGestureSensitivity,
+        brightnessGestureSensitivity = playerPreferences.brightnessGestureSensitivity,
+    )
+    val rotationState = rememberRotationState(
+        player = player,
+        screenOrientation = playerPreferences.playerScreenOrientation,
+    )
+    val errorState = rememberErrorState(player = player)
+
+    var aiEnhancerEnabled by remember { mutableStateOf(false) }
+    var dialogueBoosterEnabled by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(pictureInPictureState.isInPictureInPictureMode) {
+        if (pictureInPictureState.isInPictureInPictureMode) {
+            controlsVisibilityState.hideControls()
+        }
+    }
+
+    LaunchedEffect(tapGestureState.isLongPressGestureInAction) {
+        if (tapGestureState.isLongPressGestureInAction) {
+            controlsVisibilityState.hideControls()
+        }
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        if (playerPreferences.rememberPlayerBrightness) {
+            brightnessState.setBrightness(playerPreferences.playerBrightness)
+        }
+    }
+
+    LaunchedEffect(brightnessState.currentBrightness) {
+        if (playerPreferences.rememberPlayerBrightness) {
+            viewModel.updatePlayerBrightness(brightnessState.currentBrightness)
+        }
+    }
+
+    var overlayView by remember { mutableStateOf<OverlayView?>(null) }
+
+    CompositionLocalProvider(LocalControlsVisibilityState provides controlsVisibilityState) {
+        Box {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+            ) {
+                PlayerContentFrame(
+                    player = player,
+                    pictureInPictureState = pictureInPictureState,
+                    controlsVisibilityState = controlsVisibilityState,
+                    tapGestureState = tapGestureState,
+                    seekGestureState = seekGestureState,
+                    videoZoomAndContentScaleState = videoZoomAndContentScaleState,
+                    volumeAndBrightnessGestureState = volumeAndBrightnessGestureState,
+                    subtitleConfiguration = SubtitleConfiguration(
+                        useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle,
+                        showBackground = playerPreferences.subtitleBackground,
+                        font = playerPreferences.subtitleFont,
+                        textSize = playerPreferences.subtitleTextSize,
+                        textBold = playerPreferences.subtitleTextBold,
+                        applyEmbeddedStyles = playerPreferences.applyEmbeddedStyles,
+                    ),
+                )
+
+                AnimatedVisibility(
+                    visible = controlsVisibilityState.controlsVisible && !controlsVisibilityState.controlsLocked,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                    )
+                }
+
+                if (mediaPresentationState.isBuffering) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(72.dp),
+                    )
+                }
+
+                DoubleTapIndicator(tapGestureState = tapGestureState)
+
+                AnimatedVisibility(
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .align(Alignment.TopCenter),
+                    visible = tapGestureState.isLongPressGestureInAction || tapGestureState.isSpeedLocked,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.Black.copy(alpha = 0.85f),
+                            shadowElevation = 12.dp,
+                            modifier = Modifier
+                                .background(
+                                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        colors = listOf(Color(0xFF333333), Color(0xFF111111))
+                                    ),
+                                    shape = CircleShape
+                                )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                tapGestureState.speedPresets.forEach { speed ->
+                                    val isSelected = tapGestureState.activeSpeed == speed
+                                    Text(
+                                        text = "${speed}x",
+                                        style = if (isSelected) {
+                                            MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.ExtraBold,
+                                                fontSize = androidx.compose.ui.unit.TextUnit.Unspecified,
+                                                shadow = androidx.compose.ui.graphics.Shadow(
+                                                    color = Color(0xFFFF5722),
+                                                    blurRadius = 12f
+                                                )
+                                            )
+                                        } else {
+                                            MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Normal
+                                            )
+                                        },
+                                        color = if (isSelected) Color(0xFFFF5722) else Color.LightGray,
+                                        modifier = Modifier
+                                            .background(
+                                                if (isSelected) Color(0x33FF5722) else Color.Transparent,
+                                                shape = CircleShape
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        if (tapGestureState.isSpeedLocked) {
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0xFFFF5722),
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Text(
+                                    text = "🔒 Speed Locked (${tapGestureState.activeSpeed}x)",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (controlsVisibilityState.controlsVisible && controlsVisibilityState.controlsLocked) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .safeDrawingPadding()
+                            .padding(top = 24.dp),
+                    ) {
+                        PlayerButton(
+                            containerColor = Color.Black.copy(0.5f),
+                            onClick = { controlsVisibilityState.unlockControls() }
+                        ) {
+                            Icon(
+                                painter = painterResource(coreUiR.drawable.ic_lock),
+                                contentDescription = stringResource(coreUiR.string.controls_unlock),
+                            )
+                        }
+                    }
+                } else {
+                    PlayerControlsView(
+                        topView = {
+                            AnimatedVisibility(
+                                visible = controlsVisibilityState.controlsVisible,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                            ) {
+                                ControlsTopView(
+                                    title = metadataState.title ?: "",
+                                    onAudioClick = {
+                                        controlsVisibilityState.hideControls()
+                                        overlayView = OverlayView.AUDIO_SELECTOR
+                                    },
+                                    onSubtitleClick = {
+                                        controlsVisibilityState.hideControls()
+                                        overlayView = OverlayView.SUBTITLE_SELECTOR
+                                    },
+                                    onPlaybackSpeedClick = {
+                                        controlsVisibilityState.hideControls()
+                                        overlayView = OverlayView.PLAYBACK_SPEED
+                                    },
+                                    onPlaylistClick = {
+                                        controlsVisibilityState.hideControls()
+                                        overlayView = OverlayView.PLAYLIST
+                                    },
+                                    onBackClick = onBackClick,
+                                )
+                            }
+                        },
+                        middleView = {
+                            when {
+                                seekGestureState.seekAmount != null -> InfoView(info = "${seekGestureState.seekAmountFormatted}\n[${seekGestureState.seekToPositionFormated}]")
+                                videoZoomAndContentScaleState.isZooming -> InfoView(info = "${(videoZoomAndContentScaleState.zoom * 100).toInt()}%")
+                                videoZoomAndContentScaleState.showContentScaleIndicator -> {
+                                    val infoText = when (videoZoomAndContentScaleState.videoContentScale) {
+                                        dev.anilbeesetti.nextplayer.core.model.VideoContentScale.BEST_FIT -> "Fit to Screen"
+                                        dev.anilbeesetti.nextplayer.core.model.VideoContentScale.CROP -> "Original Cinema Scope (21:9)"
+                                        dev.anilbeesetti.nextplayer.core.model.VideoContentScale.STRETCH -> "Stretch to Fill Viewport"
+                                        else -> stringResource(videoZoomAndContentScaleState.videoContentScale.nameRes())
+                                    }
+                                    InfoView(info = infoText)
+                                }
+                                controlsVisibilityState.controlsVisible -> ControlsMiddleView(player = player)
+                                else -> Unit
+                            }
+                        },
+                        bottomView = {
+                            AnimatedVisibility(
+                                visible = controlsVisibilityState.controlsVisible && !controlsVisibilityState.controlsLocked,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                            ) {
+                                val context = LocalContext.current
+                                 ControlsBottomView(
+                                    player = player,
+                                    mediaPresentationState = mediaPresentationState,
+                                    controlsAlignment = when (playerPreferences.controlButtonsPosition) {
+                                        ControlButtonsPosition.LEFT -> Alignment.Start
+                                        ControlButtonsPosition.RIGHT -> Alignment.End
+                                    },
+                                    videoContentScale = videoZoomAndContentScaleState.videoContentScale,
+                                    isPipSupported = pictureInPictureState.isPipSupported,
+                                    onSeek = seekGestureState::onSeek,
+                                    onSeekEnd = seekGestureState::onSeekEnd,
+                                    onRotateClick = rotationState::rotate,
+                                    onPlayInBackgroundClick = onPlayInBackgroundClick,
+                                    onLockControlsClick = {
+                                        controlsVisibilityState.showControls()
+                                        controlsVisibilityState.lockControls()
+                                    },
+                                    onVideoContentScaleClick = {
+                                        controlsVisibilityState.showControls()
+                                        videoZoomAndContentScaleState.switchToNextVideoContentScale()
+                                    },
+                                    onVideoContentScaleLongClick = {
+                                        controlsVisibilityState.hideControls()
+                                        overlayView = OverlayView.VIDEO_CONTENT_SCALE
+                                    },
+                                    onPictureInPictureClick = {
+                                        if (!pictureInPictureState.hasPipPermission) {
+                                            Toast.makeText(context, coreUiR.string.enable_pip_from_settings, Toast.LENGTH_SHORT).show()
+                                            pictureInPictureState.openPictureInPictureSettings()
+                                        } else {
+                                            pictureInPictureState.enterPictureInPictureMode()
+                                        }
+                                    },
+                                    aiEnhancerEnabled = aiEnhancerEnabled,
+                                    dialogueBoosterEnabled = dialogueBoosterEnabled,
+                                    onAiEnhancerToggle = { enabled ->
+                                        aiEnhancerEnabled = enabled
+                                        player?.let { p ->
+                                            if (enabled) {
+                                                p.volume = 1.25f // AI Enhancer acoustic dynamic gain
+                                            } else {
+                                                p.volume = 1.0f
+                                            }
+                                        }
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                if (enabled) "AI Enhancer Active: Acoustic dynamic range & contrast boost applied."
+                                                else "AI Enhancer Disabled."
+                                            )
+                                        }
+                                    },
+                                    onDialogueBoosterToggle = { enabled ->
+                                        dialogueBoosterEnabled = enabled
+                                        player?.let { p ->
+                                            val trackParams = p.trackSelectionParameters
+                                            if (enabled) {
+                                                // Vocal frequency emphasis profile
+                                                p.trackSelectionParameters = trackParams.buildUpon().setMaxAudioBitrate(320000).build()
+                                            } else {
+                                                p.trackSelectionParameters = trackParams.buildUpon().setMaxAudioBitrate(Int.MAX_VALUE).build()
+                                            }
+                                        }
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                if (enabled) "Dialogue Isolation Profile Active: Vocal clarity enhancement engaged."
+                                                else "Dialogue Isolation Profile Disabled."
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        },
+                    )
+                }
+
+                val systemBarsPadding = WindowInsets.systemBars.asPaddingValues()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .displayCutoutPadding()
+                        .padding(systemBarsPadding.copy(top = 0.dp, bottom = 0.dp))
+                        .padding(24.dp),
+                ) {
+                    AnimatedVisibility(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        visible = volumeAndBrightnessGestureState.activeGesture == VerticalGesture.VOLUME,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                    ) {
+                        VerticalProgressView(
+                            value = volumeState.volumePercentage,
+                            maxValue = volumeState.maxVolumePercentage,
+                            icon = painterResource(coreUiR.drawable.ic_volume),
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                        visible = volumeAndBrightnessGestureState.activeGesture == VerticalGesture.BRIGHTNESS,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                    ) {
+                        VerticalProgressView(
+                            value = brightnessState.brightnessPercentage,
+                            icon = painterResource(coreUiR.drawable.ic_brightness),
+                        )
+                    }
+                }
+            }
+
+            OverlayShowView(
+                player = player,
+                overlayView = overlayView,
+                videoContentScale = videoZoomAndContentScaleState.videoContentScale,
+                onDismiss = { overlayView = null },
+                onSelectSubtitleClick = onSelectSubtitleClick,
+                onSubtitleSettingsClick = { overlayView = OverlayView.SUBTITLE_STYLE_CUSTOMIZER },
+                onSubtitleOptionEvent = viewModel::onSubtitleOptionEvent,
+                onVideoContentScaleChanged = { videoZoomAndContentScaleState.onVideoContentScaleChanged(it) },
+                subtitleTextSize = playerPreferences.subtitleTextSize,
+                subtitleTextColor = playerPreferences.subtitleTextColor,
+                subtitleBackgroundColor = playerPreferences.subtitleBackgroundColor,
+                onSubtitleTextSizeChange = viewModel::updateSubtitleTextSize,
+                onSubtitleTextColorChange = viewModel::updateSubtitleTextColor,
+                onSubtitleBackgroundColorChange = viewModel::updateSubtitleBackgroundColor,
+            )
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp)
+            )
+        }
+    }
+
+    errorState.error?.let { error ->
+        AlertDialog(
+            onDismissRequest = { },
+            title = {
+                Text(text = stringResource(coreUiR.string.error_playing_video))
+            },
+            text = {
+                Text(text = error.message ?: stringResource(coreUiR.string.unknown_error))
+            },
+            confirmButton = {
+                if (player.hasNextMediaItem()) {
+                    TextButton(
+                        onClick = {
+                            errorState.dismiss()
+                            player.seekToNext()
+                            player.play()
+                        },
+                    ) {
+                        Text(text = stringResource(coreUiR.string.play_next_video))
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        errorState.dismiss()
+                        onBackClick()
+                    },
+                ) {
+                    Text(text = stringResource(coreUiR.string.exit))
+                }
+            },
+        )
+    }
+
+    BackHandler {
+        if (overlayView != null) {
+            overlayView = null
+        } else {
+            onBackClick()
+        }
+    }
+}
+
+@Composable
+fun InfoView(
+    modifier: Modifier = Modifier,
+    info: String,
+    textStyle: TextStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = info,
+            style = textStyle,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+fun ControlsMiddleView(modifier: Modifier = Modifier, player: Player) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(40.dp, alignment = Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PreviousButton(player = player)
+        PlayPauseButton(player = player)
+        NextButton(player = player)
+    }
+}
+
+@Composable
+fun PlayerControlsView(
+    modifier: Modifier = Modifier,
+    topView: @Composable () -> Unit,
+    middleView: @Composable BoxScope.() -> Unit,
+    bottomView: @Composable () -> Unit,
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column {
+            topView()
+            Spacer(modifier = Modifier.weight(1f))
+            bottomView()
+        }
+
+        middleView()
+    }
+}
