@@ -17,6 +17,9 @@ subprojects {
     apply(plugin = rootProject.libs.plugins.aboutLibraries.get().pluginId)
 
     configure<com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension> {
+        export {
+            excludeFields.addAll("generated")
+        }
     }
 }
 
