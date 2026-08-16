@@ -30,6 +30,15 @@ android {
         targetCompatibility = JavaVersion.toVersion(libs.versions.android.jvm.get().toInt())
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("${project.rootDir}/app/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
@@ -47,15 +56,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             applicationIdSuffix = ".release"
             matchingFallbacks.add("release")
-        }
-    }
-
-    signingConfigs {
-        getByName("debug") {
-            storeFile = file("${project.rootDir}/app/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
         }
     }
 
