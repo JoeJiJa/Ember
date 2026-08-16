@@ -24,20 +24,22 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          validate-wrappers: false
+
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
 
       - name: Build Project with gradle
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Run Local Tests
-        run: ./gradlew test --no-daemon || true
+        run: ./gradlew test || true
 
       - name: Lint Checks
-        run: ./gradlew ktlintCheck --no-daemon || true
+        run: ./gradlew ktlintCheck || true
 
-      - name: Upload debug APK artifacts
+      - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ember-debug-apks
+          name: nextplayer-debug-apks
           path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: ignore
