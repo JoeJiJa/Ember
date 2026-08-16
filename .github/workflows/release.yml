@@ -23,15 +23,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
       - name: Grant execution permissions to Gradle wrapper
         run: chmod +x gradlew
 
       - name: Build Release APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Print Full Build Log on Failure
-        if: failure()
-        run: cat build_output.txt || true
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4

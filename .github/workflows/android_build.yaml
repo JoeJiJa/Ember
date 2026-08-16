@@ -22,23 +22,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
       - name: Make Gradlew Executable
         run: chmod +x gradlew
 
       - name: Build Project with gradle
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Print Full Build Log on Failure
-        if: failure()
-        run: cat build_output.txt || true
-
-      - name: Upload Build Log (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build_output.txt
-          if-no-files-found: ignore
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4
