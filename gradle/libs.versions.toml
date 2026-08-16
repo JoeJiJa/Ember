@@ -1,36 +1,36 @@
 [versions]
-android-compileSdk = "36"
-android-targetSdk = "36"
+android-compileSdk = "35"
+android-targetSdk = "35"
 android-minSdk = "23"
 android-jvm = "17"
-aboutlibraries = "14.0.0"
-accompanist = "0.37.3"
-androidGradlePlugin = "9.1.0"
-androidMaterial = "1.13.0"
-androidxActivity = "1.13.0"
-androidxAppCompat = "1.7.1"
-androidxComposeBom = "2026.03.01"
-androidxMaterial3 = "1.5.0-alpha17"
-androidxConstraintLayout = "2.2.1"
-androidxCore = "1.18.0"
-androidxCoreSplashscreen = "1.2.0"
-androidxDataStore = "1.2.1"
-androidxEspresso = "3.7.0"
-androidxHiltNavigationCompose = "1.3.0"
-androidxLifecycle = "2.10.0"
-androidxMedia3 = "1.10.0"
-androidxNavigation = "2.9.7"
-androidxTestExt = "1.3.0"
-coil = "3.4.0"
-hilt = "2.59.2"
+aboutlibraries = "11.2.3"
+accompanist = "0.36.0"
+androidGradlePlugin = "8.7.3"
+androidMaterial = "1.12.0"
+androidxActivity = "1.9.3"
+androidxAppCompat = "1.7.0"
+androidxComposeBom = "2024.10.01"
+androidxMaterial3 = "1.3.1"
+androidxConstraintLayout = "2.2.0"
+androidxCore = "1.15.0"
+androidxCoreSplashscreen = "1.0.1"
+androidxDataStore = "1.1.1"
+androidxEspresso = "3.6.1"
+androidxHiltNavigationCompose = "1.2.0"
+androidxLifecycle = "2.8.7"
+androidxMedia3 = "1.5.1"
+androidxNavigation = "2.8.5"
+androidxTestExt = "1.2.1"
+coil = "3.0.4"
+hilt = "2.54"
 junit4 = "4.13.2"
-kotlin = "2.3.20"
-kotlinxCoroutines = "1.10.2"
-kotlinxSerializationJson = "1.10.0"
-ksp = "2.3.6"
-ktlint = "12.3.0"
-reorderable = "3.0.0"
-room = "2.8.4"
+kotlin = "2.1.0"
+kotlinxCoroutines = "1.9.0"
+kotlinxSerializationJson = "1.7.3"
+ksp = "2.1.0-1.0.29"
+ktlint = "12.1.1"
+reorderable = "2.4.3"
+room = "2.6.1"
 nextlib = "1.9.3-0.12.0"
 universalChardet = "2.5.0"
 
@@ -89,11 +89,12 @@ kotlin-metadata-jvm = { group = "org.jetbrains.kotlin", name = "kotlin-metadata-
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 [plugins]
-aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
+aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
