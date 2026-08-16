@@ -37,8 +37,10 @@ data class OnlineSubtitleResult(
     val downloadUrl: String,
 )
 
+import androidx.compose.foundation.layout.BoxScope
+
 @Composable
-fun OnlineSubtitleDialogView(
+fun BoxScope.OnlineSubtitleDialogView(
     show: Boolean,
     videoTitle: String,
     onSubtitleSelected: (OnlineSubtitleResult) -> Unit,

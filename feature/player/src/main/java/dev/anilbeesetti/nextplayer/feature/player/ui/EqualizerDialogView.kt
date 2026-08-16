@@ -37,8 +37,10 @@ import androidx.compose.ui.unit.sp
 import dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager
 import dev.anilbeesetti.nextplayer.feature.player.audio.EqualizerPreset
 
+import androidx.compose.foundation.layout.BoxScope
+
 @Composable
-fun EqualizerDialogView(
+fun BoxScope.EqualizerDialogView(
     show: Boolean,
     equalizerManager: AudioEqualizerManager,
     onDismiss: () -> Unit,
