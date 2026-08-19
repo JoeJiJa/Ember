@@ -268,7 +268,7 @@ fun MediaPlayerScreen(
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = androidx.compose.ui.unit.TextUnit.Unspecified,
                                                 shadow = androidx.compose.ui.graphics.Shadow(
-                                                    color = Color(0xFFFF5722),
+                                                    color = Color(0xFFFF5722.toInt()),
                                                     blurRadius = 12f
                                                 )
                                             )
@@ -277,10 +277,10 @@ fun MediaPlayerScreen(
                                                 fontWeight = FontWeight.Normal
                                             )
                                         },
-                                        color = if (isSelected) Color(0xFFFF5722) else Color.LightGray,
+                                        color = if (isSelected) Color(0xFFFF5722.toInt()) else Color.LightGray,
                                         modifier = Modifier
                                             .background(
-                                                if (isSelected) Color(0x33FF5722) else Color.Transparent,
+                                                if (isSelected) Color(0x33FF5722.toInt()) else Color.Transparent,
                                                 shape = CircleShape
                                             )
                                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -292,7 +292,7 @@ fun MediaPlayerScreen(
                         if (tapGestureState.isSpeedLocked) {
                             Surface(
                                 shape = CircleShape,
-                                color = Color(0xFFFF5722),
+                                color = Color(0xFFFF5722.toInt()),
                                 modifier = Modifier.padding(top = 4.dp)
                             ) {
                                 Text(
