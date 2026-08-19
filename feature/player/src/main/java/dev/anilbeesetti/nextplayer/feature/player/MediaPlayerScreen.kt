@@ -254,38 +254,33 @@ fun MediaPlayerScreen(
                                     shape = CircleShape
                                 )
                         ) {
-                            Row(
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                tapGestureState.speedPresets.forEach { speed ->
-                                    val isSelected = tapGestureState.activeSpeed == speed
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     Text(
-                                        text = "${speed}x",
-                                        style = if (isSelected) {
-                                            MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = androidx.compose.ui.unit.TextUnit.Unspecified,
-                                                shadow = androidx.compose.ui.graphics.Shadow(
-                                                    color = Color(0xFFFF5722.toInt()),
-                                                    blurRadius = 12f
-                                                )
+                                        text = "▶  ${"%.2f".format(tapGestureState.activeSpeed)}x",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            shadow = androidx.compose.ui.graphics.Shadow(
+                                                color = Color(0xFFFF5722.toInt()),
+                                                blurRadius = 12f
                                             )
-                                        } else {
-                                            MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = FontWeight.Normal
-                                            )
-                                        },
-                                        color = if (isSelected) Color(0xFFFF5722.toInt()) else Color.LightGray,
-                                        modifier = Modifier
-                                            .background(
-                                                if (isSelected) Color(0x33FF5722) else Color.Transparent,
-                                                shape = CircleShape
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        ),
+                                        color = Color(0xFFFF5722.toInt()),
                                     )
                                 }
+
+                                Text(
+                                    text = "Swipe ◄ ► to adjust speed",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.LightGray.copy(alpha = 0.8f),
+                                    modifier = Modifier.padding(top = 2.dp)
+                                )
                             }
                         }
 
@@ -296,7 +291,7 @@ fun MediaPlayerScreen(
                                 modifier = Modifier.padding(top = 4.dp)
                             ) {
                                 Text(
-                                    text = "🔒 Speed Locked (${tapGestureState.activeSpeed}x)",
+                                    text = "🔒 Speed Locked (${"%.2f".format(tapGestureState.activeSpeed)}x)",
                                     color = Color.White,
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)

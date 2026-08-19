@@ -118,15 +118,37 @@ class TapGestureState(
         resetDoubleTapSeekState()
     }
 
+    private var accumulatedDragX = 0f
+
     fun handleLongPress(offset: Offset) {
         if (!useLongPressGesture) return
         if (!player.isPlaying) return
 
         isLongPressGestureInAction = true
         isSpeedLocked = false
+        accumulatedDragX = 0f
         activeSpeed = longPressSpeed
         currentSpeed = player.playbackParameters.speed
         player.setPlaybackSpeed(activeSpeed)
+    }
+
+    fun handleLongPressDrag(dragAmountX: Float) {
+        if (!isLongPressGestureInAction) return
+        accumulatedDragX += dragAmountX
+
+        val threshold = 35f
+        if (kotlin.math.abs(accumulatedDragX) >= threshold) {
+            val steps = (accumulatedDragX / threshold).toInt()
+            if (steps != 0) {
+                val newSpeed = (activeSpeed + steps * 0.25f).coerceIn(0.25f, 4.0f)
+                val roundedSpeed = (Math.round(newSpeed * 100f) / 100f)
+                if (roundedSpeed != activeSpeed) {
+                    activeSpeed = roundedSpeed
+                    player.setPlaybackSpeed(activeSpeed)
+                }
+                accumulatedDragX -= steps * threshold
+            }
+        }
     }
 
     fun updateSelectedSpeed(newSpeed: Float) {
