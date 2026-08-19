@@ -33,7 +33,7 @@ fun BoxScope.AudioSyncDialogView(
 ) {
     if (!show) return
 
-    var offset by remember(currentOffsetMs) { mutableLongStateOf(currentOffsetMs) }
+    var offset by remember(currentOffsetMs) { mutableStateOf(currentOffsetMs) }
 
     OverlayView(
         show = show,

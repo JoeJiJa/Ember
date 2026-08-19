@@ -49,8 +49,8 @@ fun BoxScope.EqualizerDialogView(
 
     var isEqEnabled by remember { mutableStateOf(equalizerManager.isEnabled) }
     var selectedPresetName by remember { mutableStateOf(equalizerManager.currentPresetName) }
-    var bassBoostVal by remember { mutableFloatStateOf(0f) }
-    var virtualizerVal by remember { mutableFloatStateOf(0f) }
+    var bassBoostVal by remember { mutableStateOf(0f) }
+    var virtualizerVal by remember { mutableStateOf(0f) }
 
     val bandFrequencies = listOf("60 Hz", "230 Hz", "910 Hz", "3.6 kHz", "14 kHz")
     var bandLevels by remember { mutableStateOf(listOf(0f, 0f, 0f, 0f, 0f)) }
