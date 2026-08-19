@@ -207,3 +207,72 @@ suspend fun PointerInputScope.detectCustomVerticalDragGestures(
         }
     }
 }
+
+suspend fun PointerInputScope.detectCustomTapAndLongPressDragGestures(
+    onTap: (Offset) -> Unit = {},
+    onDoubleTap: (Offset) -> Unit = {},
+    onLongPressStart: (Offset) -> Unit = {},
+    onLongPressDrag: (dragAmountX: Float) -> Unit = {},
+    onLongPressRelease: () -> Unit = {},
+) {
+    var lastUpTime = 0L
+    var lastUpPosition = Offset.Zero
+
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        val downPosition = down.position
+        val downTime = down.uptimeMillis
+        var isLongPress = false
+        val longPressTimeout = viewConfiguration.longPressTimeoutMillis
+
+        var currentPointer = down
+        while (true) {
+            val event = awaitPointerEvent(pass = PointerEventPass.Main)
+            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+            currentPointer = change
+
+            if (!change.pressed) {
+                break
+            }
+
+            val elapsed = change.uptimeMillis - downTime
+            val distance = (change.position - downPosition).getDistance()
+
+            if (distance > viewConfiguration.touchSlop && elapsed < longPressTimeout) {
+                break
+            }
+
+            if (elapsed >= longPressTimeout && !isLongPress) {
+                isLongPress = true
+                onLongPressStart(downPosition)
+            }
+
+            if (isLongPress) {
+                val dragX = change.positionChange().x
+                if (dragX != 0f) {
+                    onLongPressDrag(dragX)
+                }
+                change.consume()
+            }
+        }
+
+        if (isLongPress) {
+            onLongPressRelease()
+        } else if (!currentPointer.pressed) {
+            val upTime = currentPointer.uptimeMillis
+            val upPosition = currentPointer.position
+            val isDoubleTap = (upTime - lastUpTime < viewConfiguration.doubleTapTimeoutMillis) &&
+                    (upPosition - lastUpPosition).getDistance() < (viewConfiguration.touchSlop * 2)
+
+            if (isDoubleTap) {
+                onDoubleTap(upPosition)
+                lastUpTime = 0L
+            } else {
+                onTap(upPosition)
+                lastUpTime = upTime
+                lastUpPosition = upPosition
+            }
+        }
+    }
+}
+

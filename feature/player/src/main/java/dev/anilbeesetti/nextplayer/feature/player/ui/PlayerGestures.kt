@@ -1,6 +1,5 @@
 package dev.anilbeesetti.nextplayer.feature.player.ui
 
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomHorizontalDragGestures
+import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomTapAndLongPressDragGestures
 import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomTransformGestures
 import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomVerticalDragGestures
 import dev.anilbeesetti.nextplayer.feature.player.state.ControlsVisibilityState
@@ -34,7 +34,37 @@ fun PlayerGestures(
                 .pointerInput(
                     controlsVisibilityState.controlsLocked,
                     pictureInPictureState.isInPictureInPictureMode,
-                    tapGestureState.isLongPressGestureInAction,
+                ) {
+                    if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
+
+                    detectCustomTapAndLongPressDragGestures(
+                        onTap = {
+                            if (tapGestureState.isSpeedLocked) {
+                                tapGestureState.unlockSpeed()
+                                return@detectCustomTapAndLongPressDragGestures
+                            }
+                            if (tapGestureState.seekMillis != 0L) return@detectCustomTapAndLongPressDragGestures
+                            controlsVisibilityState.toggleControlsVisibility()
+                        },
+                        onDoubleTap = { offset ->
+                            if (controlsVisibilityState.controlsLocked) return@detectCustomTapAndLongPressDragGestures
+                            tapGestureState.handleDoubleTap(offset = offset, size = size)
+                        },
+                        onLongPressStart = { offset ->
+                            if (controlsVisibilityState.controlsLocked) return@detectCustomTapAndLongPressDragGestures
+                            tapGestureState.handleLongPress(offset = offset)
+                        },
+                        onLongPressDrag = { dragAmountX ->
+                            tapGestureState.handleLongPressDrag(dragAmountX)
+                        },
+                        onLongPressRelease = {
+                            tapGestureState.handleOnLongPressRelease()
+                        },
+                    )
+                }
+                .pointerInput(
+                    controlsVisibilityState.controlsLocked,
+                    pictureInPictureState.isInPictureInPictureMode,
                 ) {
                     if (controlsVisibilityState.controlsLocked) return@pointerInput
                     if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
@@ -46,9 +76,7 @@ fun PlayerGestures(
                             }
                         },
                         onHorizontalDrag = { change, dragAmount ->
-                            if (tapGestureState.isLongPressGestureInAction) {
-                                tapGestureState.handleLongPressDrag(dragAmount)
-                            } else {
+                            if (!tapGestureState.isLongPressGestureInAction) {
                                 seekGestureState.onDrag(change, dragAmount)
                             }
                         },
@@ -61,32 +89,6 @@ fun PlayerGestures(
                             if (!tapGestureState.isLongPressGestureInAction) {
                                 seekGestureState.onDragEnd()
                             }
-                        },
-                    )
-                }
-                .pointerInput(pictureInPictureState.isInPictureInPictureMode) {
-                    if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
-
-                    detectTapGestures(
-                        onTap = {
-                            if (tapGestureState.isSpeedLocked) {
-                                tapGestureState.unlockSpeed()
-                                return@detectTapGestures
-                            }
-                            if (tapGestureState.seekMillis != 0L) return@detectTapGestures
-                            controlsVisibilityState.toggleControlsVisibility()
-                        },
-                        onDoubleTap = {
-                            if (controlsVisibilityState.controlsLocked) return@detectTapGestures
-                            tapGestureState.handleDoubleTap(offset = it, size = size)
-                        },
-                        onPress = {
-                            tryAwaitRelease()
-                            tapGestureState.handleOnLongPressRelease()
-                        },
-                        onLongPress = {
-                            if (controlsVisibilityState.controlsLocked) return@detectTapGestures
-                            tapGestureState.handleLongPress(offset = it)
                         },
                     )
                 }
