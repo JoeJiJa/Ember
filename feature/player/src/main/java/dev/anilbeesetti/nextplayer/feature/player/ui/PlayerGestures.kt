@@ -1,19 +1,12 @@
 package dev.anilbeesetti.nextplayer.feature.player.ui
 
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
-import androidx.compose.ui.input.pointer.withTimeout
 import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomHorizontalDragGestures
 import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomTransformGestures
 import dev.anilbeesetti.nextplayer.feature.player.extensions.detectCustomVerticalDragGestures
@@ -41,34 +34,7 @@ fun PlayerGestures(
                 .pointerInput(
                     controlsVisibilityState.controlsLocked,
                     pictureInPictureState.isInPictureInPictureMode,
-                ) {
-                    if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
-
-                    detectUnifiedPlayerGestures(
-                        controlsLocked = controlsVisibilityState.controlsLocked,
-                        onToggleControls = controlsVisibilityState::toggleControlsVisibility,
-                        onDoubleTap = { offset, size ->
-                            tapGestureState.handleDoubleTap(offset, size)
-                        },
-                        onLongPressStart = { offset ->
-                            tapGestureState.handleLongPress(offset)
-                        },
-                        onLongPressDrag = { dragX ->
-                            tapGestureState.handleLongPressDrag(dragX)
-                        },
-                        onLongPressRelease = {
-                            tapGestureState.handleOnLongPressRelease()
-                        },
-                        onSpeedUnlock = {
-                            tapGestureState.unlockSpeed()
-                        },
-                        isSpeedLocked = { tapGestureState.isSpeedLocked },
-                        seekMillis = { tapGestureState.seekMillis },
-                    )
-                }
-                .pointerInput(
-                    controlsVisibilityState.controlsLocked,
-                    pictureInPictureState.isInPictureInPictureMode,
+                    tapGestureState.isLongPressGestureInAction,
                 ) {
                     if (controlsVisibilityState.controlsLocked) return@pointerInput
                     if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
@@ -95,6 +61,32 @@ fun PlayerGestures(
                             if (!tapGestureState.isLongPressGestureInAction) {
                                 seekGestureState.onDragEnd()
                             }
+                        },
+                    )
+                }
+                .pointerInput(pictureInPictureState.isInPictureInPictureMode) {
+                    if (pictureInPictureState.isInPictureInPictureMode) return@pointerInput
+
+                    detectTapGestures(
+                        onTap = {
+                            if (tapGestureState.isSpeedLocked) {
+                                tapGestureState.unlockSpeed()
+                                return@detectTapGestures
+                            }
+                            if (tapGestureState.seekMillis != 0L) return@detectTapGestures
+                            controlsVisibilityState.toggleControlsVisibility()
+                        },
+                        onDoubleTap = {
+                            if (controlsVisibilityState.controlsLocked) return@detectTapGestures
+                            tapGestureState.handleDoubleTap(offset = it, size = size)
+                        },
+                        onPress = {
+                            tryAwaitRelease()
+                            tapGestureState.handleOnLongPressRelease()
+                        },
+                        onLongPress = {
+                            if (controlsVisibilityState.controlsLocked) return@detectTapGestures
+                            tapGestureState.handleLongPress(offset = it)
                         },
                     )
                 }
@@ -135,85 +127,5 @@ fun PlayerGestures(
                     )
                 },
         )
-    }
-}
-
-private suspend fun PointerInputScope.detectUnifiedPlayerGestures(
-    controlsLocked: Boolean,
-    onToggleControls: () -> Unit,
-    onDoubleTap: (Offset, IntSize) -> Unit,
-    onLongPressStart: (Offset) -> Unit,
-    onLongPressDrag: (Float) -> Unit,
-    onLongPressRelease: () -> Unit,
-    onSpeedUnlock: () -> Unit,
-    isSpeedLocked: () -> Boolean,
-    seekMillis: () -> Long,
-) {
-    var lastTapTime = 0L
-    var lastTapOffset = Offset.Zero
-
-    awaitEachGesture {
-        val down = awaitFirstDown(requireUnconsumed = false)
-        val downOffset = down.position
-        var isLongPress = false
-        val longPressTimeout = viewConfiguration.longPressTimeoutMillis
-
-        try {
-            withTimeout(longPressTimeout) {
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                    if (!change.pressed) break
-                    val distance = (change.position - downOffset).getDistance()
-                    if (distance > viewConfiguration.touchSlop) {
-                        break
-                    }
-                }
-            }
-        } catch (e: PointerEventTimeoutCancellationException) {
-            if (!controlsLocked) {
-                isLongPress = true
-                onLongPressStart(downOffset)
-
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                    if (!change.pressed) break
-                    val dragX = change.positionChange().x
-                    if (dragX != 0f) {
-                        onLongPressDrag(dragX)
-                        change.consume()
-                    }
-                }
-
-                onLongPressRelease()
-            }
-        }
-
-        if (!isLongPress) {
-            val event = awaitPointerEvent()
-            val up = event.changes.firstOrNull { it.id == down.id }
-            if (up != null && !up.pressed) {
-                val now = up.uptimeMillis
-                val isDoubleTap = (now - lastTapTime < viewConfiguration.doubleTapTimeoutMillis) &&
-                        ((up.position - lastTapOffset).getDistance() < viewConfiguration.touchSlop * 2)
-
-                if (isDoubleTap) {
-                    if (!controlsLocked) {
-                        onDoubleTap(up.position, size)
-                    }
-                    lastTapTime = 0L
-                } else {
-                    lastTapTime = now
-                    lastTapOffset = up.position
-
-                    if (isSpeedLocked()) {
-                        onSpeedUnlock()
-                    } else if (seekMillis() == 0L) {
-                        onToggleControls()
-                    }
-                }
-            }
-        }
     }
 }
