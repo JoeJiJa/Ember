@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
             NextPlayerTheme(
                 darkTheme = shouldUseDarkTheme,
                 highContrastDarkTheme = shouldUseHighContrastDarkTheme(uiState = uiState),
-                dynamicColor = shouldUseDynamicTheming(uiState = uiState),
+                dynamicColor = false,
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

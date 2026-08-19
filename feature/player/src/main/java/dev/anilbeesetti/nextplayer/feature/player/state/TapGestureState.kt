@@ -136,18 +136,16 @@ class TapGestureState(
         if (!isLongPressGestureInAction) return
         accumulatedDragX += dragAmountX
 
-        val threshold = 35f
-        if (kotlin.math.abs(accumulatedDragX) >= threshold) {
-            val steps = (accumulatedDragX / threshold).toInt()
-            if (steps != 0) {
-                val newSpeed = (activeSpeed + steps * 0.25f).coerceIn(0.25f, 4.0f)
-                val roundedSpeed = (Math.round(newSpeed * 100f) / 100f)
-                if (roundedSpeed != activeSpeed) {
-                    activeSpeed = roundedSpeed
-                    player.setPlaybackSpeed(activeSpeed)
-                }
-                accumulatedDragX -= steps * threshold
+        val pxPerStep = 20f
+        val steps = (accumulatedDragX / pxPerStep).toInt()
+        if (steps != 0) {
+            val newSpeed = (activeSpeed + steps * 0.1f).coerceIn(0.25f, 4.0f)
+            val roundedSpeed = (Math.round(newSpeed * 100f) / 100f)
+            if (roundedSpeed != activeSpeed) {
+                activeSpeed = roundedSpeed
+                player.setPlaybackSpeed(activeSpeed)
             }
+            accumulatedDragX -= steps * pxPerStep
         }
     }
 
