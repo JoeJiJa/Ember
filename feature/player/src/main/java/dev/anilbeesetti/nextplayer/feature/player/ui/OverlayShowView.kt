@@ -26,12 +26,13 @@ fun BoxScope.OverlayShowView(
     onSubtitleTextSizeChange: (Int) -> Unit = {},
     onSubtitleTextColorChange: (String) -> Unit = {},
     onSubtitleBackgroundColorChange: (String) -> Unit = {},
-    equalizerManager: dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager = androidx.compose.runtime.remember { dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager() },
+    equalizerManager: dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager? = null,
     currentAudioSyncOffsetMs: Long = 0L,
     onAudioSyncOffsetChange: (Long) -> Unit = {},
     videoTitle: String = "",
     onOnlineSubtitleSelected: (dev.anilbeesetti.nextplayer.feature.player.ui.OnlineSubtitleResult) -> Unit = {},
 ) {
+    val eqManager = equalizerManager ?: androidx.compose.runtime.remember { dev.anilbeesetti.nextplayer.feature.player.audio.AudioEqualizerManager() }
     Box(
         modifier = Modifier
             .matchParentSize()
@@ -89,7 +90,7 @@ fun BoxScope.OverlayShowView(
 
     EqualizerDialogView(
         show = overlayView == OverlayView.EQUALIZER,
-        equalizerManager = equalizerManager,
+        equalizerManager = eqManager,
         onDismiss = onDismiss,
     )
 
