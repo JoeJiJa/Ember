@@ -119,7 +119,7 @@ fun ControlsBottomView(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = "AI Video Enhancer",
-                    tint = if (aiEnhancerEnabled) Color(0xFFFFD700) else Color(0xFF888888),
+                    tint = if (aiEnhancerEnabled) Color(0xFFFFD700.toInt()) else Color(0xFF888888.toInt()),
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
@@ -145,7 +145,7 @@ fun ControlsBottomView(
                 Icon(
                     imageVector = Icons.Filled.Notifications,
                     contentDescription = "Dialogue Booster",
-                    tint = if (dialogueBoosterEnabled) Color(0xFF00E676) else Color(0xFF888888),
+                    tint = if (dialogueBoosterEnabled) Color(0xFF00E676.toInt()) else Color(0xFF888888.toInt()),
                     modifier = Modifier.size(18.dp)
                 )
                 Text(

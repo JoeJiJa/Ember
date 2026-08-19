@@ -249,7 +249,7 @@ fun MediaPlayerScreen(
                             modifier = Modifier
                                 .background(
                                     brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                                        colors = listOf(Color(0xFF333333), Color(0xFF111111))
+                                        colors = listOf(Color(0xFF333333.toInt()), Color(0xFF111111.toInt()))
                                     ),
                                     shape = CircleShape
                                 )
@@ -268,7 +268,7 @@ fun MediaPlayerScreen(
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = androidx.compose.ui.unit.TextUnit.Unspecified,
                                                 shadow = androidx.compose.ui.graphics.Shadow(
-                                                    color = Color(0xFFFF5722),
+                                                    color = Color(0xFFFF5722.toInt()),
                                                     blurRadius = 12f
                                                 )
                                             )
@@ -277,7 +277,7 @@ fun MediaPlayerScreen(
                                                 fontWeight = FontWeight.Normal
                                             )
                                         },
-                                        color = if (isSelected) Color(0xFFFF5722) else Color.LightGray,
+                                        color = if (isSelected) Color(0xFFFF5722.toInt()) else Color.LightGray,
                                         modifier = Modifier
                                             .background(
                                                 if (isSelected) Color(0x33FF5722) else Color.Transparent,
@@ -292,7 +292,7 @@ fun MediaPlayerScreen(
                         if (tapGestureState.isSpeedLocked) {
                             Surface(
                                 shape = CircleShape,
-                                color = Color(0xFFFF5722),
+                                color = Color(0xFFFF5722.toInt()),
                                 modifier = Modifier.padding(top = 4.dp)
                             ) {
                                 Text(
