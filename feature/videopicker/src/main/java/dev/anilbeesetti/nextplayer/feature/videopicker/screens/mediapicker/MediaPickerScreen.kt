@@ -98,6 +98,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -707,11 +708,11 @@ fun EmberBottomNavigation(
     themeColor: Color
 ) {
     Surface(
-        color = Color.Black.copy(alpha = 0.8f),
+        color = Color(0xFF0F1118).copy(alpha = 0.95f),
         modifier = Modifier
             .fillMaxWidth()
-            .border(width = 0.5.dp, color = Color(0xFF222222), shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            .border(width = 0.5.dp, color = Color(0x33FF5722), shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Row(
             modifier = Modifier
@@ -721,17 +722,17 @@ fun EmberBottomNavigation(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val tabs: List<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>> = listOf(
-                "Videos" to Icons.Filled.PlayArrow,
-                "Music" to Icons.Filled.Home,
-                "Download" to Icons.Default.KeyboardArrowDown,
-                "More" to Icons.Filled.Settings
+            val tabs = listOf(
+                "Videos" to R.drawable.ic_nav_videos,
+                "Music" to R.drawable.ic_nav_music,
+                "Download" to R.drawable.ic_nav_download,
+                "More" to R.drawable.ic_nav_more
             )
 
-            tabs.forEach { (tabName, icon) ->
+            tabs.forEach { (tabName, iconRes) ->
                 val isSelected = selectedTab == tabName
                 val activeColor = themeColor
-                val inactiveColor = Color(0xFF888888)
+                val inactiveColor = Color(0xFF7A8090)
 
                 Column(
                     modifier = Modifier
@@ -741,7 +742,7 @@ fun EmberBottomNavigation(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(id = iconRes),
                         contentDescription = tabName,
                         tint = if (isSelected) activeColor else inactiveColor,
                         modifier = Modifier.size(24.dp)
