@@ -1,6 +1,7 @@
 package dev.anilbeesetti.nextplayer.feature.videopicker.tools
 
 import android.content.Context
+import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMuxer
@@ -39,7 +40,7 @@ object AudioExtractorManager {
             muxer.start()
 
             val buffer = ByteBuffer.allocate(1024 * 1024)
-            val bufferInfo = android.media.MediaCodec.BufferInfo()
+            val bufferInfo = MediaCodec.BufferInfo()
 
             var totalBytesRead = 0L
             val durationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) format.getLong(MediaFormat.KEY_DURATION) else 0L
