@@ -16,7 +16,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -41,7 +40,6 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.letterSpacing
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.anilbeesetti.nextplayer.R
@@ -106,7 +104,7 @@ fun EmberSplashScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0A0B0E)),
+                .background(Color(0xFF0A0B0E.toInt())),
             contentAlignment = Alignment.Center,
         ) {
             // Particle & Ember Glow Canvas
@@ -119,8 +117,8 @@ fun EmberSplashScreen(
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0x44FF5722),
-                            Color(0x22D84315),
+                            Color(0x44FF5722.toInt()),
+                            Color(0x22D84315.toInt()),
                             Color(0x00000000),
                         ),
                         center = center,
@@ -138,7 +136,7 @@ fun EmberSplashScreen(
                     } * canvasHeight
 
                     drawCircle(
-                        color = Color(0xFFFF9800).copy(alpha = particle.alpha * 0.8f),
+                        color = Color(0xFFFF9800.toInt()).copy(alpha = particle.alpha * 0.8f),
                         radius = particle.radius,
                         center = Offset(px, py),
                     )
@@ -174,9 +172,9 @@ fun EmberSplashScreen(
                         fontSize = 38.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 8.sp,
-                        color = Color(0xFFFFB300),
+                        color = Color(0xFFFFB300.toInt()),
                         shadow = Shadow(
-                            color = Color(0xFFFF5722),
+                            color = Color(0xFFFF5722.toInt()),
                             blurRadius = 24f,
                         ),
                     ),
@@ -192,7 +190,7 @@ fun EmberSplashScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         letterSpacing = 4.sp,
-                        color = Color(0xB3FFFFFF),
+                        color = Color(0xB3FFFFFF.toInt()),
                     ),
                     modifier = Modifier.alpha(textAlpha.value),
                 )
@@ -216,7 +214,7 @@ fun EmberSplashScreen(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
                                         Color(0x00FF5722),
-                                        Color(0xFFFFD700),
+                                        Color(0xFFFFD700.toInt()),
                                         Color(0x00FF5722),
                                     ),
                                     startX = startPos * 400f,
