@@ -38,7 +38,6 @@ fun BoxScope.AudioSyncDialogView(
     OverlayView(
         show = show,
         title = "Audio / Video Sync Offset",
-        onDismiss = onDismiss,
     ) {
         Column(
             modifier = Modifier

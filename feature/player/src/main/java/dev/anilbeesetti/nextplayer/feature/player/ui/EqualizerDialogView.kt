@@ -58,7 +58,6 @@ fun BoxScope.EqualizerDialogView(
     OverlayView(
         show = show,
         title = "Graphic Equalizer",
-        onDismiss = onDismiss,
     ) {
         Column(
             modifier = Modifier

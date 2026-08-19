@@ -55,7 +55,6 @@ fun BoxScope.OnlineSubtitleDialogView(
     OverlayView(
         show = show,
         title = "Online Subtitle Downloader",
-        onDismiss = onDismiss,
     ) {
         Column(
             modifier = Modifier
