@@ -42,7 +42,7 @@ object AudioExtractorManager {
             val bufferInfo = android.media.MediaCodec.BufferInfo()
 
             var totalBytesRead = 0L
-            val durationUs = format.getLong(MediaFormat.KEY_DURATION)
+            val durationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) format.getLong(MediaFormat.KEY_DURATION) else 0L
 
             while (true) {
                 val sampleSize = extractor.readSampleData(buffer, 0)

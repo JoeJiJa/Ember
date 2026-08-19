@@ -30,14 +30,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Release APK
-        run: |
-          ./gradlew assembleDebug --stacktrace > build.log 2>&1
-          STATUS=$?
-          if [ $STATUS -ne 0 ]; then
-            echo "::error::Gradle build failed with status $STATUS"
-            tail -n 200 build.log
-            exit $STATUS
-          fi
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload Debug APK Artifacts
         uses: actions/upload-artifact@v4
