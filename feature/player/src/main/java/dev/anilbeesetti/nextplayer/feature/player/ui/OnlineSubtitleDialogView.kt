@@ -107,7 +107,7 @@ fun BoxScope.OnlineSubtitleDialogView(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF2A2A2A))
+                                .background(Color(0xFF2A2A2A.toInt()))
                                 .clickable {
                                     onSubtitleSelected(result)
                                     onDismiss()

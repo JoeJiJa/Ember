@@ -100,7 +100,7 @@ fun BoxScope.EqualizerDialogView(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFF333333))
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFF333333.toInt()))
                             .clickable {
                                 selectedPresetName = preset.name
                                 equalizerManager.applyPreset(preset)

@@ -32,9 +32,9 @@ fun BoxScope.DualSubtitleOverlayView(
             text = secondaryText,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFFFFD700), // Dual subtitle secondary gold accent
+            color = Color(0xFFFFD700.toInt()), // Dual subtitle secondary gold accent
             modifier = Modifier
-                .background(Color(0xAA000000), RoundedCornerShape(4.dp))
+                .background(Color(0xAA000000.toInt()), RoundedCornerShape(4.dp))
                 .padding(horizontal = 10.dp, vertical = 4.dp),
         )
     }
