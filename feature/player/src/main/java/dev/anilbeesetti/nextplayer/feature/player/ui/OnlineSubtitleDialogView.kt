@@ -30,14 +30,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.compose.foundation.layout.BoxScope
+
 data class OnlineSubtitleResult(
     val id: String,
     val title: String,
     val language: String,
     val downloadUrl: String,
 )
-
-import androidx.compose.foundation.layout.BoxScope
 
 @Composable
 fun BoxScope.OnlineSubtitleDialogView(
