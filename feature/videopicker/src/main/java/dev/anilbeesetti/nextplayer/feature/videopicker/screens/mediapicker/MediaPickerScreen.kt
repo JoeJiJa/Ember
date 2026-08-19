@@ -67,6 +67,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
@@ -261,19 +262,14 @@ internal fun MediaPickerScreen(
             FloatingActionButtonMenu(
                 expanded = isFabExpanded,
                 button = {
-                    ToggleFloatingActionButton(
-                        checked = isFabExpanded,
-                        onCheckedChange = { isFabExpanded = !isFabExpanded },
+                    FloatingActionButton(
+                        onClick = { isFabExpanded = !isFabExpanded },
+                        containerColor = themeColor,
+                        contentColor = Color.White,
                     ) {
-                        val icon by remember {
-                            derivedStateOf {
-                                if (checkedProgress > 0.5f) NextIcons.Close else NextIcons.Play
-                            }
-                        }
                         Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            modifier = Modifier.animateIcon(checkedProgress = { checkedProgress }),
+                            imageVector = if (isFabExpanded) NextIcons.Close else NextIcons.Play,
+                            contentDescription = "Expand Options",
                         )
                     }
                 },
