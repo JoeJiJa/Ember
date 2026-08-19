@@ -13,6 +13,7 @@ class VaultManager(private val context: Context) {
         return keyguardManager?.isDeviceSecure == true
     }
 
+    @Suppress("DEPRECATION")
     fun createConfirmDeviceCredentialIntent(title: String, description: String): Intent? {
         val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
         return keyguardManager?.createConfirmDeviceCredentialIntent(title, description)
