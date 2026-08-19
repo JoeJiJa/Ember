@@ -98,81 +98,72 @@ class MainActivity : ComponentActivity() {
                 highContrastDarkTheme = shouldUseHighContrastDarkTheme(uiState = uiState),
                 dynamicColor = shouldUseDynamicTheming(uiState = uiState),
             ) {
-                var showComposeSplash by remember { mutableStateOf(true) }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface,
+                ) {
+                    val storagePermissionState = rememberPermissionState(permission = storagePermission)
 
-                androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.surface,
-                    ) {
-                        val storagePermissionState = rememberPermissionState(permission = storagePermission)
+                    LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
+                        storagePermissionState.launchPermissionRequest()
+                    }
 
-                        LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
-                            storagePermissionState.launchPermissionRequest()
-                        }
-
-                        LaunchedEffect(key1 = storagePermissionState.status.isGranted) {
-                            if (storagePermissionState.status.isGranted) {
-                                synchronizer.startSync()
-                            }
-                        }
-
-                        val mainNavController = rememberNavController()
-
-                        NavHost(
-                            navController = mainNavController,
-                            startDestination = MediaRootRoute,
-                            enterTransition = {
-                                slideIntoContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                                    animationSpec = tween(
-                                        durationMillis = 200,
-                                        easing = LinearEasing,
-                                    ),
-                                )
-                            },
-                            exitTransition = {
-                                slideOutOfContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                                    animationSpec = tween(
-                                        durationMillis = 200,
-                                        easing = LinearEasing,
-                                    ),
-                                    targetOffset = { fullOffset -> (fullOffset * 0.3f).toInt() },
-                                )
-                            },
-                            popEnterTransition = {
-                                slideIntoContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                                    animationSpec = tween(
-                                        durationMillis = 200,
-                                        easing = LinearEasing,
-                                    ),
-                                    initialOffset = { fullOffset -> (fullOffset * 0.3f).toInt() },
-                                )
-                            },
-                            popExitTransition = {
-                                slideOutOfContainer(
-                                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                                    animationSpec = tween(
-                                        durationMillis = 200,
-                                        easing = LinearEasing,
-                                    ),
-                                )
-                            },
-                        ) {
-                            mediaNavGraph(
-                                context = this@MainActivity,
-                                navController = mainNavController,
-                            )
-                            settingsNavGraph(navController = mainNavController)
+                    LaunchedEffect(key1 = storagePermissionState.status.isGranted) {
+                        if (storagePermissionState.status.isGranted) {
+                            synchronizer.startSync()
                         }
                     }
 
-                    dev.anilbeesetti.nextplayer.ui.EmberSplashScreen(
-                        isVisible = showComposeSplash,
-                        onSplashFinished = { showComposeSplash = false },
-                    )
+                    val mainNavController = rememberNavController()
+
+                    NavHost(
+                        navController = mainNavController,
+                        startDestination = MediaRootRoute,
+                        enterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                                animationSpec = tween(
+                                    durationMillis = 200,
+                                    easing = LinearEasing,
+                                ),
+                            )
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                                animationSpec = tween(
+                                    durationMillis = 200,
+                                    easing = LinearEasing,
+                                ),
+                                targetOffset = { fullOffset -> (fullOffset * 0.3f).toInt() },
+                            )
+                        },
+                        popEnterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                                animationSpec = tween(
+                                    durationMillis = 200,
+                                    easing = LinearEasing,
+                                ),
+                                initialOffset = { fullOffset -> (fullOffset * 0.3f).toInt() },
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                                animationSpec = tween(
+                                    durationMillis = 200,
+                                    easing = LinearEasing,
+                                ),
+                            )
+                        },
+                    ) {
+                        mediaNavGraph(
+                            context = this@MainActivity,
+                            navController = mainNavController,
+                        )
+                        settingsNavGraph(navController = mainNavController)
+                    }
                 }
             }
         }
