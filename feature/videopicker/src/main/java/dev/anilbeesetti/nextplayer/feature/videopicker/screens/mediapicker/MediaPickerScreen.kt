@@ -11,6 +11,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +26,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +39,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -99,7 +105,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -109,28 +117,34 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import dev.anilbeesetti.nextplayer.core.common.Utils
 import dev.anilbeesetti.nextplayer.core.common.storagePermission
 import dev.anilbeesetti.nextplayer.core.media.services.MediaService
+import dev.anilbeesetti.nextplayer.core.model.ApplicationPreferences
 import dev.anilbeesetti.nextplayer.core.model.Folder
 import dev.anilbeesetti.nextplayer.core.model.MediaLayoutMode
+import dev.anilbeesetti.nextplayer.core.model.MediaViewMode
 import dev.anilbeesetti.nextplayer.core.model.Video
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.base.DataState
+import dev.anilbeesetti.nextplayer.core.ui.components.CancelButton
+import dev.anilbeesetti.nextplayer.core.ui.components.DoneButton
 import dev.anilbeesetti.nextplayer.core.ui.components.NextDialog
 import dev.anilbeesetti.nextplayer.core.ui.composables.PermissionMissingView
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.CenterCircularProgressBar
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.MediaView
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.NoVideosFound
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.RenameDialog
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.VideoInfoDialog
+import dev.anilbeesetti.nextplayer.feature.videopicker.state.SelectedFolder
+import dev.anilbeesetti.nextplayer.feature.videopicker.state.SelectedVideo
 import dev.anilbeesetti.nextplayer.feature.videopicker.state.rememberSelectionManager
 import java.util.Locale
 
@@ -383,6 +397,19 @@ internal fun MediaPickerScreen(
         VideoInfoDialog(
             video = video,
             onDismiss = { showInfoActionFor = null },
+        )
+    }
+
+    if (showDeleteVideosConfirmation) {
+        DeleteConfirmationDialog(
+            selectedVideos = selectionManager.selectedVideos,
+            selectedFolders = selectionManager.selectedFolders,
+            onConfirm = {
+                onEvent(MediaPickerUiEvent.DeleteVideos(selectionManager.allSelectedVideos.map { it.uriString }))
+                selectionManager.clearSelection()
+                showDeleteVideosConfirmation = false
+            },
+            onCancel = { showDeleteVideosConfirmation = false },
         )
     }
 }
@@ -1947,4 +1974,305 @@ fun EmberCinemaBottomNav(
             }
         }
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+// PRIVATE COMPOSABLES (shared / required by MediaPickerScreen)
+// -------------------------------------------------------------------------------------------------
+
+@Composable
+private fun DarkTopAppBar(
+    title: String,
+    showBackButton: Boolean,
+    onNavigateUp: () -> Unit,
+    onMusicToggle: () -> Unit,
+    onLayoutToggle: () -> Unit,
+    onSearchClick: () -> Unit,
+    isInSelectionMode: Boolean,
+    selectedCount: Int,
+    totalCount: Int,
+    onClearSelection: () -> Unit,
+    onSelectAllToggle: () -> Unit,
+    isAllSelected: Boolean
+) {
+    Surface(
+        color = Color(0xFF0C0C0C),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .statusBarsPadding()
+                .height(64.dp)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isInSelectionMode) {
+                IconButton(onClick = onClearSelection) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Close",
+                        tint = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "$selectedCount / $totalCount Selected",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = onSelectAllToggle) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = "Select All Toggle",
+                        tint = Color.White
+                    )
+                }
+            } else {
+                if (showBackButton) {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontFamily = FontFamily.SansSerif,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(onClick = onMusicToggle) {
+                    Icon(
+                        imageVector = Icons.Filled.Home,
+                        contentDescription = "Home",
+                        tint = Color.White
+                    )
+                }
+
+                IconButton(onClick = onLayoutToggle) {
+                    Icon(
+                        imageVector = Icons.Filled.List,
+                        contentDescription = "Layout Toggle",
+                        tint = Color.White
+                    )
+                }
+
+                IconButton(onClick = onSearchClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "Search",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectionActionsSheet(
+    modifier: Modifier = Modifier,
+    show: Boolean,
+    showRenameAction: Boolean,
+    showInfoAction: Boolean,
+    onPlayAction: () -> Unit,
+    onRenameAction: () -> Unit,
+    onShareAction: () -> Unit,
+    onInfoAction: () -> Unit,
+    onDeleteAction: () -> Unit,
+) {
+    AnimatedVisibility(
+        modifier = modifier.padding(
+            start = WindowInsets.displayCutout.asPaddingValues()
+                .calculateStartPadding(LocalLayoutDirection.current),
+        ),
+        visible = show,
+        enter = slideInVertically { it },
+        exit = slideOutVertically { it },
+    ) {
+        val shape = MaterialTheme.shapes.large.copy(
+            bottomStart = ZeroCornerSize,
+            bottomEnd = ZeroCornerSize,
+        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFF1E1E1E),
+                        shape = shape,
+                    )
+                    .clip(shape)
+                    .horizontalScroll(rememberScrollState())
+                    .navigationBarsPadding()
+                    .padding(
+                        horizontal = 8.dp,
+                        vertical = 12.dp,
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                SelectionAction(
+                    imageVector = NextIcons.Play,
+                    title = stringResource(R.string.play),
+                    onClick = onPlayAction,
+                )
+                if (showRenameAction) {
+                    SelectionAction(
+                        imageVector = NextIcons.Edit,
+                        title = stringResource(R.string.rename),
+                        onClick = onRenameAction,
+                    )
+                }
+                SelectionAction(
+                    imageVector = NextIcons.Share,
+                    title = stringResource(R.string.share),
+                    onClick = onShareAction,
+                )
+                if (showInfoAction) {
+                    SelectionAction(
+                        imageVector = NextIcons.Info,
+                        title = stringResource(id = R.string.info),
+                        onClick = onInfoAction,
+                    )
+                }
+                SelectionAction(
+                    imageVector = NextIcons.Delete,
+                    title = stringResource(id = R.string.delete),
+                    onClick = onDeleteAction,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectionAction(
+    imageVector: ImageVector,
+    title: String,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .defaultMinSize(
+                minWidth = 75.dp,
+                minHeight = 64.dp,
+            )
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = 16.dp,
+                vertical = 8.dp,
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = title,
+            modifier = Modifier.size(24.dp),
+            tint = Color.White,
+        )
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(
+            text = title,
+            modifier = Modifier,
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun DeleteConfirmationDialog(
+    modifier: Modifier = Modifier,
+    selectedVideos: Set<SelectedVideo>,
+    selectedFolders: Set<SelectedFolder>,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    NextDialog(
+        onDismissRequest = onCancel,
+        title = {
+            Text(
+                text = when {
+                    selectedVideos.isEmpty() -> when (selectedFolders.size) {
+                        1 -> stringResource(R.string.delete_one_folder)
+                        else -> stringResource(R.string.delete_folders, selectedFolders.size)
+                    }
+
+                    selectedFolders.isEmpty() -> when (selectedVideos.size) {
+                        1 -> stringResource(R.string.delete_one_video)
+                        else -> stringResource(R.string.delete_videos, selectedVideos.size)
+                    }
+
+                    else -> stringResource(R.string.delete_items, selectedFolders.size + selectedVideos.size)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                modifier = modifier,
+            ) {
+                Text(text = stringResource(R.string.delete))
+            }
+        },
+        dismissButton = { CancelButton(onClick = onCancel) },
+        modifier = modifier,
+        content = {
+            Text(
+                text = if ((selectedFolders.size + selectedVideos.size) == 1) {
+                    stringResource(R.string.delete_item_info)
+                } else {
+                    stringResource(R.string.delete_items_info)
+                },
+                style = MaterialTheme.typography.titleSmall,
+            )
+        },
+    )
+}
+
+@Composable
+private fun NetworkUrlDialog(
+    onDismiss: () -> Unit,
+    onDone: (String) -> Unit,
+) {
+    var url by rememberSaveable { mutableStateOf("") }
+    NextDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.network_stream)) },
+        content = {
+            Text(text = stringResource(R.string.enter_a_network_url))
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedTextField(
+                value = url,
+                onValueChange = { url = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(text = stringResource(R.string.example_url)) },
+            )
+        },
+        confirmButton = {
+            DoneButton(
+                enabled = url.isNotBlank(),
+                onClick = { onDone(url) },
+            )
+        },
+        dismissButton = { CancelButton(onClick = onDismiss) },
+    )
 }
