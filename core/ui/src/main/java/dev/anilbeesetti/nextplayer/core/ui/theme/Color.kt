@@ -239,4 +239,16 @@ val surfaceContainerPureBlack = Color(0xFF121212)
 val surfaceContainerHighPureBlack = Color(0xFF1A1A1A)
 val surfaceContainerHighestPureBlack = Color(0xFF222222)
 
-val seed = Color(0xFFFF5722)
+val seed = Color(0xFFFF385C)
+
+// Cyberpunk Cinema & Studio Palette
+val NeonCoral = Color(0xFFFF385C)
+val NeonRed = Color(0xFFEF4444)
+val DeepRed = Color(0xFFDC2626)
+val ElectricCyan = Color(0xFF06B6D4)
+val CyanAccent = Color(0xFF00E5FF)
+val HdrBlue = Color(0xFF3B82F6)
+val ObsidianDark = Color(0xFF08090D)
+val ObsidianCard = Color(0xFF12131D)
+val ObsidianCardBorder = Color(0xFF262B3D)
+val GlassSurface = Color(0xCC12131D)

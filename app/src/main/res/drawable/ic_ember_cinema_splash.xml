@@ -1,0 +1,81 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+
+    <!-- Outer Orbiting Ring Telemetry -->
+    <path
+        android:strokeColor="#FFEF4444"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.4"
+        android:pathData="M 120, 32 A 88, 88 0 1, 1 119.9, 32" />
+
+    <!-- Cyan Telemetry Node -->
+    <path
+        android:fillColor="#FF06B6D4"
+        android:pathData="M 208, 120 m -3, 0 a 3, 3 0 1, 0 6, 0 a 3, 3 0 1, 0 -6, 0" />
+
+    <!-- Red Telemetry Node -->
+    <path
+        android:fillColor="#FFFF385C"
+        android:pathData="M 32, 120 m -3, 0 a 3, 3 0 1, 0 6, 0 a 3, 3 0 1, 0 -6, 0" />
+
+    <!-- Mid Speed Ring -->
+    <path
+        android:strokeColor="#FFEF4444"
+        android:strokeWidth="2"
+        android:strokeAlpha="0.7"
+        android:pathData="M 120, 46 A 74, 74 0 1, 1 119.9, 46" />
+
+    <!-- Cyan Mid Node -->
+    <path
+        android:fillColor="#FF06B6D4"
+        android:pathData="M 120, 194 m -3, 0 a 3, 3 0 1, 0 6, 0 a 3, 3 0 1, 0 -6, 0" />
+
+    <!-- Main App Card Squircle Background -->
+    <path
+        android:fillColor="#FF12131D"
+        android:strokeColor="#FFFF385C"
+        android:strokeWidth="2.5"
+        android:pathData="M 96, 70 L 144, 70 A 26, 26 0 0, 1 170, 96 L 170, 144 A 26, 26 0 0, 1 144, 170 L 96, 170 A 26, 26 0 0, 1 70, 144 L 70, 96 A 26, 26 0 0, 1 96, 70 Z" />
+
+    <!-- Inner Bevel Glass Line -->
+    <path
+        android:strokeColor="#FF06B6D4"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.45"
+        android:pathData="M 96, 73 L 144, 73 A 23, 23 0 0, 1 167, 96 L 167, 144 A 23, 23 0 0, 1 144, 167 L 96, 167 A 23, 23 0 0, 1 73, 144 L 73, 96 A 23, 23 0 0, 1 96, 73 Z" />
+
+    <!-- Concentric Neon Soundwave Lens -->
+    <path
+        android:fillColor="#FF090A10"
+        android:strokeColor="#FFDC2626"
+        android:strokeWidth="3"
+        android:pathData="M 120, 86 A 34, 34 0 1, 1 119.9, 86" />
+
+    <path
+        android:strokeColor="#FF06B6D4"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.6"
+        android:pathData="M 120, 94 A 26, 26 0 1, 1 119.9, 94" />
+
+    <!-- Glowing Play Triangle -->
+    <path
+        android:fillColor="#FFFF385C"
+        android:pathData="M 113, 107 L 134, 120 L 113, 133 Z" />
+
+    <!-- Particles -->
+    <path
+        android:fillColor="#FFEF4444"
+        android:pathData="M 62, 74 m -2, 0 a 2, 2 0 1, 0 4, 0 a 2, 2 0 1, 0 -4, 0" />
+
+    <path
+        android:fillColor="#FF06B6D4"
+        android:pathData="M 182, 166 m -2, 0 a 2, 2 0 1, 0 4, 0 a 2, 2 0 1, 0 -4, 0" />
+
+    <path
+        android:fillColor="#FFFF385C"
+        android:pathData="M 172, 68 m -2, 0 a 2, 2 0 1, 0 4, 0 a 2, 2 0 1, 0 -4, 0" />
+
+</vector>
