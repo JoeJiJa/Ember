@@ -1,8 +1,8 @@
-name: Build and Release EMBER APK
+name: Build and Release Char APK
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, char ]
   workflow_dispatch:
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Build EMBER Web Distribution
+      - name: Build Char Web Distribution
         run: |
           cd web-player
           bun install
@@ -41,13 +41,13 @@ jobs:
       - name: Locate and Rename APK
         run: |
           mkdir -p release-artifacts
-          find . -name "*.apk" -type f -exec cp {} release-artifacts/EMBER-Player-v1.0.0-debug.apk \;
+          find . -name "*.apk" -type f -exec cp {} release-artifacts/Char-Player-v1.0.0-debug.apk \;
           ls -la release-artifacts/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: EMBER-Player-v1.0.0-debug
+          name: Char-Player-v1.0.0-debug
           path: release-artifacts/*.apk
 
       - name: Create GitHub Release & Upload APK
@@ -55,14 +55,14 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           files: release-artifacts/*.apk
-          tag_name: v1.0.0
-          name: "EMBER v1.0.0 - AMOLED Video Player"
+          tag_name: v1.0.0-char
+          name: "Char v1.0.0 - AMOLED Video Player"
           body: |
-            ### 🌟 EMBER - Next-Gen AMOLED Video Player
-            Rebuilt and modernized video player featuring:
+            ### 🌟 Char - Next-Gen AMOLED Video Player
+            Modernized video player featuring:
             - **AMOLED Pitch-Black Design**: `#050505` with brushed metallic cards & warm gold `#F59E0B` accents.
             - **Gesture Control**: Swipe brightness, swipe volume/audio boost (up to 200%), double-tap seek ripples.
-            - **Hold & Swipe Speed**: Long-press for 2X and swipe right up to 5X speed!
+            - **Hold & Swipe Speed**: Long-press for 2X and swipe right up to 5X speed (2.0x -> 2.5 -> 2.75 -> 3.0 -> 3.25 -> 3.5 -> 3.75 -> 4.0 -> 4.25 -> 4.5 -> 4.75 -> 5.0x)!
             - **Audio Studio**: 5-band Equalizer and Night Mode Dynamics Compressor.
             - **Dynamic Ambient Glow**: Real-time edge color backglow projection.
             - **Local File & Stream Support**: High performance native playback.

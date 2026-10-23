@@ -366,7 +366,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
       if (ctx) {
         ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
         const link = document.createElement('a');
-        link.download = `EMBER_${video.title.replace(/\s+/g, '_')}_${Math.round(currentTime)}s.png`;
+        link.download = `Char_${video.title.replace(/\s+/g, '_')}_${Math.round(currentTime)}s.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
         setSnapshotFlash(true);

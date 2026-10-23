@@ -52,7 +52,7 @@ export const MediaLibraryScreen: React.FC<MediaLibraryScreenProps> = ({
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-400 via-amber-200 to-white bg-clip-text text-transparent">
-                EMBER
+                Char
               </h1>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-mono tracking-wider text-amber-400 font-semibold">
